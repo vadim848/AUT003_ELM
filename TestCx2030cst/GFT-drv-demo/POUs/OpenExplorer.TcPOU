@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <POU Name="OpenExplorer" Id="{80637652-bad4-4a3d-9d2c-e314b152fe2e}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM OpenExplorer
+VAR_INPUT
+    NETID     : T_AmsNetId;
+    PATHSTR   : T_MaxString;
+    DIRNAME   : T_MaxString;
+    COMNDLINE : T_MaxString;
+    START     : BOOL;
+    TMOUT     : TIME := DEFAULT_ADS_TIMEOUT;
+	
+	
+	NT_StartProcess1      : NT_StartProcess;
+NT_StartProcess_Busy  : BOOL;
+NT_StartProcess_Err   : BOOL;
+NT_StartProcess_ErrId : UDINT;
+StartProcess          : BOOL;
+
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+NETID := '5.144.18.242.1.1';
+PATHSTR := 'C:\WINNT\NOTEPAD.EXE';
+DIRNAME := 'C:\WINNT';
+COMNDLINE := 'win.ini';
+
+NT_StartProcess1(
+	NETID:= '5.144.18.242.1.1', 
+	PATHSTR:= '\windows\explorer.exe', 
+	DIRNAME:= '\windows' , 
+	COMNDLINE:= 'explorer.exe' , 
+	START:= gvl_io.OpenExplorer_cmd, 
+	TMOUT:= TMOUT , 
+	BUSY=> NT_StartProcess_Busy , 
+	ERR=> NT_StartProcess_Err, 
+	ERRID=> NT_StartProcess_ErrId);
+	
+	
+]]></ST>
+    </Implementation>
+    <LineIds Name="OpenExplorer">
+      <LineId Id="38" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="34" Count="2" />
+      <LineId Id="23" Count="8" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="42" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

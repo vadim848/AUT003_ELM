@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <DUT Name="CSdo_State" Id="{6ddaa31c-8588-465f-b0b7-14480b07ddb0}">
+    <Declaration><![CDATA[TYPE CSdo_State :
+STRUCT
+	nIndex          : WORD;
+	nSubIndex       : BYTE;
+	bExecute        : BOOL := TRUE;
+	bError			: BOOL;
+	nErrId 			: UDINT;
+	nBufLen   		: UDINT; 
+	pBuf			: PVOID;	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

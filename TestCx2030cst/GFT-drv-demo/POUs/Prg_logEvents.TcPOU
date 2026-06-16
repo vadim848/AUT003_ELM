@@ -1,0 +1,322 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <POU Name="Prg_logEvents" Id="{94d1c41a-5dab-4638-b414-f70a8e4bc406}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Prg_logEvents
+VAR CONSTANT
+	FilePathAndName: STRING:='\Temp\Log.xls';
+	sHeader :STRING:='Date$TTime$TDescrition';
+END_VAR
+VAR
+	fbFileOpen					:	FB_FileOpen;
+	fbFileClose					:	FB_FileClose;
+	fbFileWrite					:	FB_FileWrite;
+	fbFileGet					:	FB_FileGets;
+
+	StartTrig: R_TRIG;
+	LogData: BOOL;
+	
+	bStart: BOOL;
+	iState: INT;
+	hFile: UINT;
+
+
+	bBusy: BOOL;
+	bDone: BOOL;
+	bError: BOOL;
+
+	sLine: STRING;
+	sLineToWrite:STRING;
+
+	iErrorState: INT;
+	FirstLine: STRING;
+	sDescriptionToLog1:STRING;
+	sDescriptionToLog2:STRING;	
+	LogDummyNumber:INT;
+	appendLineToLog: BOOL;
+	CloseFile: BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[StartTrig(Clk:=gvl_io.Log_Data);
+		
+CASE iState OF
+	0:	IF StartTrig.Q THEN
+			fbFileOpen.bExecute := FALSE;
+			fbFileClose.bExecute := FALSE;
+			fbFileWrite.bExecute := FALSE;
+			fbFileGet.bExecute := FALSE;
+			bDone:=FALSE;
+			bError:=FALSE;
+			iState := iState + 1;
+		END_IF
+
+	1:	(* open a file to test it's content *)
+		fbFileOpen(
+			sPathName:=FilePathAndName ,
+			nMode:=  FOPEN_MODEWRITE OR FOPEN_MODEPLUS, 
+			bExecute:=TRUE  );
+	
+		IF fbFileOpen.bBusy THEN
+			iState := iState + 1;
+		END_IF
+
+	2:	IF NOT fbFileOpen.bBusy AND NOT fbFileOpen.bError THEN
+			hFile:=fbFileOpen.hFile;
+			fbFileOpen.bExecute := FALSE;
+			(*IF NOT gvl_io.New_CSV_cmd
+				THEN
+				iState := 80;
+				gvl_io.New_CSV_cmd := true;
+				ELSE
+					iState := iState + 1;
+				
+			END_IF
+			*)
+			
+			iState := iState + 1;
+		ELSIF fbFileOpen.bError THEN
+			iErrorState:=iState;
+			iState := 99;
+		END_IF
+
+
+	3:	(*Get First line to check if file allready writen *)
+		fbFileGet(
+			hFile:=hFile ,
+			bExecute:=TRUE ,
+			tTimeout:=T#1s ,
+			sLine=>FirstLine ,
+			bEOF=> );
+
+		IF fbFileGet.bBusy THEN
+			iState := iState + 1;
+		END_IF;
+
+	4:	IF NOT fbFileGet.bBusy AND NOT fbFileGet.bError THEN
+			fbFileGet(bExecute:=FALSE);
+			IF FirstLine='' THEN
+				iState := iState + 1;
+			ELSE
+				iState:=10;
+			END_IF
+		ELSIF fbFileGet.bError THEN
+			iErrorState:=iState;
+			iState := 99;
+		END_IF
+
+	5:	(*write file header*)
+		fbFileWrite(
+				sNetId:='' ,
+				hFile:=hFile ,
+				pWriteBuff:= ADR(sHeader),
+				cbWriteLen:=LEN(sHeader) ,
+				bExecute:=TRUE ,
+				tTimeout:=T#5s );
+
+		IF fbFileWrite.bBusy THEN
+			iState := iState + 1;
+		END_IF;
+
+
+	6:	IF  NOT fbFileWrite.bBusy
+			AND NOT fbFileWrite.bError   THEN
+				fbFileWrite.bExecute:=FALSE;
+				iState := iState + 1;
+		ELSIF fbFileWrite.bError THEN
+			iErrorState:=iState;
+			iState := 99;
+		END_IF
+
+	7: (*close the file handle*)
+		fbFileClose.bExecute := TRUE;
+		fbFileClose.hFile := hFile;
+		IF fbFileClose.bBusy THEN
+			iState := iState + 1;
+		END_IF;
+
+	8:	IF NOT fbFileClose.bBusy AND NOT fbFileClose.bError THEN
+			fbFileClose.bExecute := FALSE;
+			iState := 10;
+		ELSIF fbFileClose.bError THEN
+			iErrorState:=iState;
+			iState := 99;
+		END_IF
+
+	10:	(* open a file to append line*)
+		fbFileOpen(
+			sPathName:=FilePathAndName ,
+			nMode:= FOPEN_MODEAPPEND ,
+			bExecute:=TRUE ,
+			hFile=>hFile );
+	
+		IF fbFileOpen.bBusy THEN
+			iState := iState + 1;
+		END_IF
+
+	11:	IF NOT fbFileOpen.bBusy AND NOT fbFileOpen.bError THEN
+			hFile:=fbFileOpen.hFile;
+			fbFileOpen.bExecute := FALSE;
+			iState := iState + 1;
+		ELSIF fbFileOpen.bError THEN
+			iErrorState:=iState;
+			iState := 99;
+		END_IF
+
+	(*	
+	12: IF appendLineToLog THEN
+			appendLineToLog:=FALSE;
+			iState := iState + 1;
+		ELSIF CloseFile THEN
+			CloseFile:=FALSE;
+			iState := 80;
+		END_IF		
+*)
+	12: IF gvl_io.Lod_appendLine_cmd THEN
+			gvl_io.Lod_appendLine_cmd := FALSE;
+			iState := iState + 1;
+		ELSIF gvl_io.Log_CloseFile_cmd THEN
+			gvl_io.Log_CloseFile_cmd := FALSE;
+			iState := 80;
+		END_IF	
+	
+	13:
+		LogDummyNumber:=LogDummyNumber+1;		
+		sDescriptionToLog1:=concat('+', REAL_TO_STRING(gvl_io.Motor_I_PV));
+		sDescriptionToLog2:=concat('', DINT_TO_STRING(gvl_io.Position_PV_HMI));
+		iState := iState + 2;
+		
+	15:	(* write data into log file*)
+		sLineToWrite:=CONCAT('$N', Prg_GetClock.sDate); //$N == new line
+		sLineToWrite:=CONCAT( sLineToWrite, '$T'); //$T == Tab 
+		sLineToWrite:=CONCAT( sLineToWrite,Prg_GetClock.sTime);
+		sLineToWrite:=CONCAT( sLineToWrite, '$T');
+		sLineToWrite:=CONCAT( sLineToWrite,sDescriptionToLog1);
+		sLineToWrite:=CONCAT( sLineToWrite, '$T');
+		sLineToWrite:=CONCAT( sLineToWrite,sDescriptionToLog2);
+		
+		
+
+		fbFileWrite(
+				sNetId:='' ,
+				hFile:=hFile ,
+				pWriteBuff:= ADR(sLineToWrite),
+				cbWriteLen:=LEN(sLineToWrite) ,
+				bExecute:=TRUE ,
+				tTimeout:=T#5s ,
+				bBusy=> ,
+				bError=>,
+				nErrId=> );
+
+		IF  NOT fbFileWrite.bBusy
+			AND NOT fbFileWrite.bError   THEN
+			fbFileWrite.bExecute:=FALSE;
+			iState:=12;
+		END_IF
+
+
+
+
+
+	80: (*close the file handle*)
+		fbFileClose.bExecute := TRUE;
+		fbFileClose.hFile := hFile;
+		IF fbFileClose.bBusy THEN
+			iState := iState + 1;
+		END_IF;
+
+	81:	IF NOT fbFileClose.bBusy AND NOT fbFileClose.bError THEN
+			fbFileClose.bExecute := FALSE;
+			iState := 88;
+			hFile := fbFileClose.hFile;
+		ELSIF fbFileClose.bError THEN
+			iErrorState:=iState;
+			iState := 99;
+		END_IF
+
+	88: bBusy := FALSE;
+		bDone := NOT bError;
+		iState := 0;
+
+	99:	bError := TRUE;
+		iState := 88;
+
+
+
+END_CASE;
+fbFileOpen();
+fbFileClose();
+fbFileWrite();
+fbFileGet();
+
+
+
+
+IF gvl_io.Reset 
+	THEN 
+	iState := 0;
+END_IF
+
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="Prg_logEvents">
+      <LineId Id="3" Count="0" />
+      <LineId Id="5" Count="13" />
+      <LineId Id="418" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="417" Count="0" />
+      <LineId Id="22" Count="7" />
+      <LineId Id="405" Count="1" />
+      <LineId Id="411" Count="1" />
+      <LineId Id="409" Count="1" />
+      <LineId Id="408" Count="0" />
+      <LineId Id="407" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="419" Count="1" />
+      <LineId Id="31" Count="21" />
+      <LineId Id="312" Count="0" />
+      <LineId Id="54" Count="5" />
+      <LineId Id="270" Count="0" />
+      <LineId Id="62" Count="17" />
+      <LineId Id="278" Count="0" />
+      <LineId Id="81" Count="2" />
+      <LineId Id="85" Count="14" />
+      <LineId Id="313" Count="0" />
+      <LineId Id="101" Count="18" />
+      <LineId Id="323" Count="0" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="325" Count="5" />
+      <LineId Id="324" Count="0" />
+      <LineId Id="459" Count="0" />
+      <LineId Id="474" Count="0" />
+      <LineId Id="463" Count="0" />
+      <LineId Id="475" Count="0" />
+      <LineId Id="464" Count="0" />
+      <LineId Id="466" Count="0" />
+      <LineId Id="476" Count="0" />
+      <LineId Id="460" Count="0" />
+      <LineId Id="458" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="230" Count="1" />
+      <LineId Id="367" Count="0" />
+      <LineId Id="122" Count="0" />
+      <LineId Id="232" Count="0" />
+      <LineId Id="123" Count="4" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="370" Count="0" />
+      <LineId Id="369" Count="0" />
+      <LineId Id="365" Count="1" />
+      <LineId Id="133" Count="44" />
+      <LineId Id="266" Count="0" />
+      <LineId Id="180" Count="6" />
+      <LineId Id="467" Count="1" />
+      <LineId Id="187" Count="0" />
+      <LineId Id="189" Count="0" />
+      <LineId Id="421" Count="0" />
+      <LineId Id="423" Count="0" />
+      <LineId Id="422" Count="0" />
+      <LineId Id="190" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

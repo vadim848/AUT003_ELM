@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <DUT Name="E_ModesOfOperation" Id="{8c8de403-8b2f-45ca-92de-ff24af4c62da}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_ModesOfOperation :
+(
+	ED_MO_NoModeChange := 0 , 
+	ED_MO_Profile_position_mode := 1 , 
+	ED_MO_Profile_velocity_mode := 3 , 
+	ED_MO_Torque_profile_mode := 4, 
+	ED_MO_Inertial_profile_mode := 5, 
+	ED_MO_Homing_mode := 6, 
+	ED_MO_Interpolated_position_mode := 7, 
+	ED_MO_Cyclic_sync_position_mode := 8, 
+	ED_MO_Cyclic_sync_velocity_mode := 9, 
+	ED_MO_Cyclic_sync_torque_mode := 10,
+	ED_MO_Profile_only_velocity_mode := 11,
+	ED_MO_Profile_test_wave_mode := 12,
+	ED_MO_User_Prj_spec_mode := 13
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

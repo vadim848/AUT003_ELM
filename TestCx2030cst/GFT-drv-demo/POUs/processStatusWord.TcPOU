@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="processStatusWord" Id="{ed5dd30e-2889-4095-9c16-1baad58a225e}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION processStatusWord : Ds402_SW
+VAR_INPUT
+	StatusWord : INT; 
+END_VAR
+VAR
+	StatusWord_Bits : Ds402_SW;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Process Status word
+//StatusWord := ServoCtrl.StatusWord;
+
+StatusWord_Bits.ReadyToSwitchOn := StatusWord.0;// = bitand(sw,1);
+StatusWord_Bits.SwitchOn  := StatusWord.1;//= bitand(bitshift(sw,-1),1);
+StatusWord_Bits.OperationEnabled  := StatusWord.2;// = bitand(bitshift(sw,-2),1);
+StatusWord_Bits.Fault  := StatusWord.3;// = bitand(bitshift(sw,-3),1);
+StatusWord_Bits.VoltageEnabled  := StatusWord.4;// = bitand(bitshift(sw,-4),1);
+StatusWord_Bits.NoQuickStop  := StatusWord.5;// = bitand(bitshift(sw,-5),1);
+StatusWord_Bits.SwitchOnDisabled  := StatusWord.6;// = bitand(bitshift(sw,-6),1);
+StatusWord_Bits.Warning  := StatusWord.7;// = bitand(bitshift(sw,-7),1);
+StatusWord_Bits.ManufacturerSpecific8  := StatusWord.8;// = bitand(bitshift(sw,-8),1);
+StatusWord_Bits.Remote  := StatusWord.9;// = bitand(bitshift(sw,-9),1);
+StatusWord_Bits.TargetReached  := StatusWord.10;// = bitand(bitshift(sw,-10),1);
+StatusWord_Bits.InternalLimitActive  := StatusWord.11;// = bitand(bitshift(sw,-11),1);
+StatusWord_Bits.OperationModeSpecific12to13  :=BIT_TO_INT(StatusWord.12) + 2*BIT_TO_INT(StatusWord.13)  ;// = bitand(bitshift(sw,-12),3);
+StatusWord_Bits.ManufacturerSpecific14to15  := BIT_TO_INT(StatusWord.14) + 2*BIT_TO_INT(StatusWord.15)   ;// = bitand(bitshift(sw,-14),3);
+
+StatusWord_Bits.SetPointAck := StatusWord.12;
+StatusWord_Bits.FollowingError := StatusWord.13;
+
+// Process control word
+(*
+if status == ST_WORD_SWITCH_ON_DISABLED
+    TransitionList = [CTL_WORD_TRANSITION_SHUTDOWN,CTL_WORD_TRANSITION_SW_ON_ENA_OPER] ;
+elseif status == ST_WORD_READY_TO_SWITCH_ON
+    TransitionList = [CTL_WORD_TRANSITION_SW_ON_ENA_OPER] ;
+elseif status == ST_WORD_SWITCHED_ON
+    TransitionList = [CTL_WORD_TRANSITION_ENABLE_OPER] ;
+elseif status == ST_WORD_OPERATION_ENABLED
+    % Already oeration enabled - nothing to do
+    return ;
+*)
+processStatusWord:= StatusWord_Bits;
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="processStatusWord">
+      <LineId Id="8" Count="16" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="26" Count="12" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

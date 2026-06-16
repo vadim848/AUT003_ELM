@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <POU Name="Prg_GetClock" Id="{15f9ac56-4099-4a15-a37f-f4485257601f}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Prg_GetClock
+VAR
+
+(* Real Time Clock *)
+	tRealTime				: DATE_AND_TIME;
+	stSystemTime			: TimeStruct;
+
+	sTime					: STRING[20];
+	sDate					: STRING[20];
+	sTimeWithMicroSec		: STRING[40];
+
+	syncTimer 	: TON;
+	fbGetLocalTime 	: NT_GetTime;
+	fbRTC_EX2 	: RTC_EX2;
+	presetTime 	: TimeStruct;
+	syncTrigger 	: F_TRIG;
+	bBusy 		: BOOL;
+	bError 		: BOOL;
+	nErrID 		: UDINT;
+	temp1: DATE;
+	temp2: TOD;
+	NetId :STRING :='';
+	bValid_RTCEX2 	: BOOL;
+	nMicroseconds 	: DWORD;
+	WeekOfYear: INT;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*--------->Set Plc Clock<----------------*)
+
+tRealTime:=SYSTEMTIME_TO_DT(stSystemTime);
+temp1:=DT_TO_DATE(tRealTime);
+temp2:=DT_TO_TOD(tRealTime);
+sDate:=DATE_TO_STRING(temp1);
+sDate:=DELETE(sDate,2,1);
+
+
+sTime:=TOD_TO_STRING(temp2);
+sTime:=DELETE(sTime,4,1);
+sTimeWithMicroSec:=CONCAT(sTime,'.');
+sTimeWithMicroSec:=CONCAT(sTimeWithMicroSec,DWORD_TO_STRING(nMicroseconds));
+
+
+
+
+	syncTimer(IN:=NOT SyncTimer.Q , PT:=T#1s , Q=> , ET=> );
+
+	fbGetLocalTime(
+		NETID:='' ,
+		START:=syncTimer.Q,
+		TMOUT:=T#5s ,
+		BUSY=>bBusy ,
+		ERR=>bError ,
+		ERRID=>nErrId ,
+		TIMESTR=>presetTime );
+
+	syncTrigger(CLK:=NOT bBusy
+					 AND NOT bError , Q=> );
+	fbRTC_EX2(
+		EN:=syncTrigger.Q ,
+		PDT:=presetTime ,
+		PMICRO:=0 ,
+		Q=>bValid_RTCEX2 ,
+		CDT=>stSystemTime ,
+		CMICRO=>nMicroseconds );
+
+WeekOfYear:=F_GetWeekOfTheYear(tRealTime);
+]]></ST>
+    </Implementation>
+    <LineIds Name="Prg_GetClock">
+      <LineId Id="3" Count="38" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

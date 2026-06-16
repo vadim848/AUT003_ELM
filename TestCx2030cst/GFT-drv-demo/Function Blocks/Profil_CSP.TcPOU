@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <POU Name="Profil_CSP" Id="{c97deb03-2f22-4046-b70f-d664e870f472}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK Profil_CSP
+VAR_INPUT
+	p_in,pold,vold,vcc,acc,Ts : REAL;
+	
+END_VAR
+VAR_OUTPUT
+	pp, pv :REAL;
+END_VAR
+VAR
+	 p, v , pTol, vTol , pnext, vnext : REAL;
+	ProblemInverted : BOOL;
+		
+
+
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//FUNCTION [pp,pv] = SpeedOnlyProfilerA(p_in,pold,vold,vcc,acc,Ts);
+//
+// Difference left to this instance, no extra speed taken
+p :=  ( p_in - pold ) ;
+
+IF ( p < 0.0 ) THEN
+    v := -vold ;
+    p := -p ;
+    ProblemInverted := TRUE ;
+else
+    v := vold  ;
+    ProblemInverted := FALSE ;
+END_IF
+
+pTol := 0.5*acc*Ts*Ts;
+vTol := acc*Ts;
+IF( p < pTol AND ABS(v) < vTol ) THEN 
+    pp := p_in ;
+    pv := 0 ;
+    return;
+END_IF
+
+vnext := v + acc*Ts;
+IF vnext > SQRT(2*acc*p) THEN 
+    vnext := SQRT(2*acc*p) ;
+END_IF
+
+
+IF vnext > vcc THEN
+	vnext := vcc;
+END_IF
+
+pnext := 0.5 * Ts * ( v + vnext );
+
+// We have the next speed and acceleration. Revert to frame
+IF ProblemInverted THEN
+	vnext := -vnext ;
+    pnext := -pnext ;
+END_IF
+
+// Integrate speed and position references using the given acceleration
+pnext := pold + pnext ;
+pp := pnext ;
+pv := vnext ;
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="Profil_CSP">
+      <LineId Id="10" Count="25" />
+      <LineId Id="64" Count="1" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="39" Count="3" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="44" Count="1" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="46" Count="4" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

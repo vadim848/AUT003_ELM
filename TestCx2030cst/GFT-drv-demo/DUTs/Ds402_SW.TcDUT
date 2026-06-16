@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <DUT Name="Ds402_SW" Id="{b422ff62-6f28-456f-8b8b-fde7dd56fd54}">
+    <Declaration><![CDATA[TYPE Ds402_SW :
+STRUCT
+	ReadyToSwitchOn : BOOL;// = bitand(sw,1);
+	SwitchOn : BOOL;//= bitand(bitshift(sw,-1),1);
+	OperationEnabled : BOOL;// = bitand(bitshift(sw,-2),1);
+	Fault : BOOL;// = bitand(bitshift(sw,-3),1);
+	VoltageEnabled : BOOL;// = bitand(bitshift(sw,-4),1);
+	NoQuickStop : BOOL;// = bitand(bitshift(sw,-5),1);
+	SwitchOnDisabled : BOOL;// = bitand(bitshift(sw,-6),1);
+	Warning : BOOL;// = bitand(bitshift(sw,-7),1);
+	ManufacturerSpecific8 : BOOL;// = bitand(bitshift(sw,-8),1);
+	Remote : BOOL;// = bitand(bitshift(sw,-9),1);
+	TargetReached : BOOL;// = bitand(bitshift(sw,-10),1);
+	InternalLimitActive : BOOL;// = bitand(bitshift(sw,-11),1);
+	OperationModeSpecific12to13 : INT;// = bitand(bitshift(sw,-12),3);
+	ManufacturerSpecific14to15 : INT;// = bitand(bitshift(sw,-14),3);
+
+	SetPointAck:   BOOL ;// bitand(bitshift(sw,-12),1);
+	FollowingError:BOOL ; // bitand(bitshift(sw,-13),1);
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

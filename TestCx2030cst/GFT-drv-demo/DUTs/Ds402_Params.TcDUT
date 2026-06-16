@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <DUT Name="Ds402_Params" Id="{fde42a18-38d2-47e3-823c-6466fd47b269}">
+    <Declaration><![CDATA[TYPE Ds402_Params :
+STRUCT
+	Motor_rated_torque0x6076 : UDINT;
+	Interpolation_time_period0x60C2_1_period : USINT;
+	Interpolation_time_period0x60C2_2_period : SINT;
+	vendorId_0x1081_1 : UDINT;
+	Postion_window0x6067 : UDINT;
+	Position_window_time0x6068 :  UINT;
+	Abort_connection_option_code_0x6007 :  UINT;
+	Torque_slope0x6087 :    UDINT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

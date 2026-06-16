@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <GVL Name="GVL_IO" Id="{2d581e76-6a39-440a-85c1-e97267a0ac4b}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	
+	// Digital Input
+	ixGripper_Up AT%I*:BOOL;
+	ixEncoder AT%I*:BOOL;
+	ixHome_Position AT%I*:BOOL;
+	ixEmergancy_Stop AT%I*:BOOL;
+	ixGripperLock_1 AT%I*:BOOL;
+	ixGripperLock_2 AT%I*:BOOL;
+	ixGripper_Unlock AT%I*:BOOL;
+	ixGripperLock_A AT%I*:BOOL;
+	ixGripperLock_B AT%I*:BOOL;
+	
+	
+	//MOtor input
+	Velosity_PV AT%I*:DINT;
+	
+	// Digital Output
+	qxStart_Motor AT%Q*:BOOL;
+	qxOpen_Gripper AT%Q*:BOOL;
+	qxGripper_UP AT%Q*:BOOL;
+	qxSTO_toDrive AT%Q*:BOOL;
+	qxEPO_Active AT%Q*:BOOL;
+	qxClose_Gripper AT%Q*:BOOL;
+	qxBrakeOpen AT%Q*:BOOL;
+	qxActuator_1 AT%Q*:BOOL; 	// Direction : 0 - close; 1 - open
+	qxActuator_2 AT%Q*:BOOL;	// command Move 
+	
+	// Global
+	Reset, Homing, Motor_UP, Motor_DN, Gripper_Open_cmd, Gripper_Close_cmd, Jog_UP, Jog_DN , Zeroing_cmd: BOOL;
+	Position_PV, Position_SP, Motor_I , Position_PV_HMI, Position_PV_Diff: DINT;
+	 
+	Motor_I_PV, Motor_I_MAX, Motor_I_AVR : REAL;
+	Motor_I_mem : ARRAY [0..500] OF REAL;
+	Position_PV_mem : ARRAY [0..500] OF DINT;
+	
+	
+	Enable, Emergancy_OK, Motor_UP_cmd, Motor_DN_cmd, Homing_OK, Homing_cmd , TwoSensorLock:BOOL;
+	Step, Gripper_step:INT;
+	Always_ON, Always_OFF, FirstScan :BOOL;
+	GO_TO_cmd, Motion_in_Progress, Ready_for_start, Start, Stop, Run_Cycle, Enable_motor_cmd:BOOL;
+	tonHomingError_IN, tonHomingStepDelay_IN : BOOL;
+	tonHomingStepDelay_SP : TIME;
+	
+	 
+	
+	
+	Position_UP_SP_LL, Position_UP_SP_HL, Position_DN_SP_LL, Position_DN_SP_HL : DINT;
+	Cycle_PV: UDINT;
+	UP_pause_in:BOOL;
+	Error, Gripper_Open_Error, Gripper_Close_Error , Emergancy_Error, SensorLock_Error, Homing_Error, Motor_Error: BOOL;
+	Position_sp_test : DINT;
+	pp, pv :REAL;
+	Speed_SP_mem, Accseleration_SP_mem : REAL;
+	tonUserDelay_IN, tonUserDelay_Q, tonMotionError_IN, tonMotionError_Q : BOOL;
+	tonLogTimer_IN , tonLogTimer_Q : BOOL;
+	Password : INT := 9118 ;
+	Password_IN : INT;
+	
+	Calc_log_cmd , OpenExplorer_cmd, New_CSV_cmd : BOOL;
+	Lod_appendLine_cmd, Log_CloseFile_cmd : BOOL;
+	Log_nMode : DWORD;
+	Log_Data, Motor_UP_slow_cmd, Motor_DN_slow_cmd , Slow_cycle_cmd , ATP_start_cmd: BOOL;	
+	test_Gripper_open_OK, test_Gripper_close_OK, test_motor_sldown_ok, test_motor_slUP_ok, test_Insert_OK, test_slowCycle_OK : BOOL;
+		
+	
+	
+	
+END_VAR
+
+VAR_GLOBAL PERSISTENT
+	vcc_SP : REAL ; //:= 4000000;
+	acc_SP: REAL ; //:= 80000000;
+    Position_UP_SP, Position_DN_SP : DINT;
+	Position_UP_A_SP, Position_DN_A_SP : DINT; // position  Accseleration Change
+	Speed_SP, Accseleration_SP , Accseleration_A_SP: REAL;
+	Speed_SP_slow, Accseleration_SP_slow : REAL;
+	Cycle_SP : UDINT;
+	Motor_Limit_UP, Motor_Limit_DN :DINT; 
+	
+	
+	
+	
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

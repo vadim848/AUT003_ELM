@@ -1,0 +1,160 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <POU Name="FB_PosTest" Id="{4aec3ffd-4b45-43d2-82c4-3567bfb43c10}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_PosTest
+VAR_INPUT
+	PosTargetR : DINT;
+	PosTargetL : DINT;
+END_VAR
+VAR_OUTPUT
+	ApplyPosTargetNow : BOOL :=FALSE;
+	PosCmd : DINT;
+	nCycles : DINT := 0;
+END_VAR
+VAR
+	eStateMachine		: E_PosTest := E_PosTest.Idle_init;
+	inWindow : BOOL := TRUE;
+	waitApplyPosTargetNow : UDINT;
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Execute" Id="{1051fbff-c7f9-44ae-b67e-9bac046637ed}">
+      <Declaration><![CDATA[METHOD Execute : BOOL
+VAR_INPUT
+END_VAR
+VAR
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE eStateMachine OF
+	E_PosTest.Idle_init:
+		ApplyPosTargetNow := FALSE;
+		waitApplyPosTargetNow:=1000;
+		IF Ds402.StatusWord_Bits.SwitchOn THEN
+			eStateMachine := E_PosTest.Idle_start;
+		END_IF
+	E_PosTest.Idle_start:
+	waitApplyPosTargetNow:=waitApplyPosTargetNow-1;
+	IF waitApplyPosTargetNow =0 THEN
+		eStateMachine := E_PosTest.GoToNextState_levelHi;
+	END_IF
+	
+	E_PosTest.GoToNextState_levelHi:
+	nCycles:=nCycles+1;
+		PosCmd := PosTargetR;
+		ApplyPosTargetNow := TRUE;//waitApplyPosTargetNow:=1000;
+		eStateMachine := E_PosTest.MovingTo_levelHi;
+		inWindow := TRUE;
+	E_PosTest.MovingTo_levelHi:
+		//waitApplyPosTargetNow:=waitApplyPosTargetNow-1;
+		//IF  waitApplyPosTargetNow=0  THEN
+		//ApplyPosTargetNow := FALSE;
+		//END_IF
+			IF Ds402.StatusWord_Bits.SetPointAck THEN
+				ApplyPosTargetNow := FALSE;
+			END_IF
+
+		IF NOT Ds402.StatusWord_Bits.TargetReached THEN
+			inWindow := FALSE;
+		END_IF
+		IF  Ds402.StatusWord_Bits.TargetReached AND NOT inWindow THEN
+			eStateMachine := E_PosTest.GoToNextState_levelLo;
+		END_IF
+
+	E_PosTest.GoToNextState_levelLo:
+		PosCmd := PosTargetL;
+		ApplyPosTargetNow := TRUE;//waitApplyPosTargetNow:=1000;
+		eStateMachine := E_PosTest.MovingTo_levelLo;
+		inWindow := TRUE;
+	E_PosTest.MovingTo_levelLo:
+		//waitApplyPosTargetNow:=waitApplyPosTargetNow-1;
+		//IF  waitApplyPosTargetNow=0  THEN
+		//	ApplyPosTargetNow := FALSE;
+		//END_IF
+		IF Ds402.StatusWord_Bits.SetPointAck THEN
+			ApplyPosTargetNow := FALSE;
+		END_IF
+
+		IF NOT Ds402.StatusWord_Bits.TargetReached THEN
+			inWindow := FALSE;
+		END_IF
+		IF  Ds402.StatusWord_Bits.TargetReached AND NOT inWindow THEN
+			eStateMachine := E_PosTest.GoToNextState_levelHi;
+		END_IF
+		
+END_CASE
+
+
+ServoCtrl.PosTarget := PosCmd;
+ServoCtrl.TargetTorque := 0;
+ServoCtrl.ModeOfOperation := TO_SINT(E_ModesOfOperation.ED_MO_Profile_position_mode);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Restart" Id="{723566c6-5b1e-4908-9f6f-22281a13a987}">
+      <Declaration><![CDATA[METHOD Restart : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[	eStateMachine		  := E_PosTest.Idle_init;
+	inWindow   := TRUE;
+	nCycles    :=  0;
+	]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_PosTest">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PosTest.Execute">
+      <LineId Id="5" Count="0" />
+      <LineId Id="60" Count="1" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="65" Count="1" />
+      <LineId Id="68" Count="2" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="18" Count="1" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="45" Count="1" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="73" Count="2" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="31" Count="6" />
+      <LineId Id="49" Count="1" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="76" Count="2" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="39" Count="5" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="14" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PosTest.Restart">
+      <LineId Id="6" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="8" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

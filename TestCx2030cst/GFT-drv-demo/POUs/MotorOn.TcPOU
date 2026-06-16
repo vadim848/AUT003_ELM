@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="MotorOn" Id="{25676b52-14e4-4eab-809c-ab3edc73b4b2}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION MotorOn : UINT
+VAR_INPUT
+	StatusWord_Bits : Ds402_SW;
+	ApplyPosTargetNow : BOOL;
+END_VAR
+VAR
+	ControlWord : UINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[ControlWord := 16#000F;// default
+IF (StatusWord_Bits.SwitchOnDisabled = TRUE ) THEN
+	ControlWord := 6;
+ELSE   	
+		    IF (StatusWord_Bits.ReadyToSwitchOn = TRUE) THEN
+			        ControlWord := 7;
+			END_IF 
+			
+			IF (StatusWord_Bits.SwitchOn = TRUE) THEN
+					ControlWord := 16#000F +   16#0020;//   change set immediately
+			END_IF
+			
+END_IF
+IF ApplyPosTargetNow THEN
+	ControlWord.4 := 1; // New set point 
+ELSE
+	ControlWord.4 := 0; // clear point		
+END_IF
+IF	StatusWord_Bits.Fault THEN
+	ControlWord.7 := 1;// clear fault
+ELSE
+	ControlWord.7 := 0;
+END_IF
+//ServoCtrl.ControlWord := ControlWord;
+MotorOn := ControlWord;
+]]></ST>
+    </Implementation>
+    <LineIds Name="MotorOn">
+      <LineId Id="8" Count="14" />
+      <LineId Id="47" Count="1" />
+      <LineId Id="23" Count="5" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="38" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

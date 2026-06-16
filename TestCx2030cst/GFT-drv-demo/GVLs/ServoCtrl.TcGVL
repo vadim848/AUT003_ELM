@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <GVL Name="ServoCtrl" Id="{58167c45-839d-43ea-b895-40cfd6036c8a}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	TargetTorque AT %Q*: INT;
+	TorqueProfState: REAL;
+	PosTarget  AT %Q*: DINT;
+	Position  AT %I*: DINT ;
+	ControlWord AT %Q*: UINT;
+	StatusWord AT %I*:  INT ;
+	ActualCurrent AT %I*:  DINT ;
+	ModeOfOperation AT %Q*: SINT;
+	PosSensor1 AT %I*:  DINT ;
+	PosSensor2 AT %I*:  DINT ;
+	Max_torque0x6072 AT %Q*: UINT;
+	Target_velocity0x60FF AT %Q*: DINT;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

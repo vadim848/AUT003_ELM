@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <POU Name="Main_10ms" Id="{29894ea1-65c2-4e7c-956e-9f59c5a57d0c}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Main_10ms
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+Prg_GetClock();
+Prg_logEvents();
+OpenExplorer();
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="Main_10ms">
+      <LineId Id="6" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="11" Count="2" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

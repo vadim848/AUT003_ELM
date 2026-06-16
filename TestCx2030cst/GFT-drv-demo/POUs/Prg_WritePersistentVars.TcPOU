@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <POU Name="Prg_WritePersistentVars" Id="{3bc90efe-a9ce-4064-9b5c-f4509fe44ce9}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Prg_WritePersistentVars
+VAR
+	//fb_FB_S_UPS: FB_S_UPS_CX51x0;
+	fb_FB_S_UPS: FB_S_UPS_CX9020_U900;
+	fb_FB_WritePersistentData: FB_WritePersistentData;
+	
+	_WritePersis: BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[fb_FB_S_UPS(
+		sNetID:='' , 
+		iPLCPort:=851 , 
+		//iplPort:= , 
+		tTimeout:= , 
+		eUpsMode:=eSUPS_WrPersistData_Shutdown , 
+		ePersistentMode:=SPDM_2PASS , 
+		tRecoverTime:= , 
+		bPowerFailDetect=> , 
+		eState=> );
+		
+		
+
+fb_FB_WritePersistentData(
+	NETID:= , 
+	PORT:= 851, 
+	START:=_WritePersis , 
+	TMOUT:= , 
+	MODE:= , 
+	BUSY=> , 
+	ERR=> , 
+	ERRID=> );
+	
+	
+	]]></ST>
+    </Implementation>
+    <LineIds Name="Prg_WritePersistentVars">
+      <LineId Id="3" Count="9" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="31" Count="5" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="47" Count="1" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

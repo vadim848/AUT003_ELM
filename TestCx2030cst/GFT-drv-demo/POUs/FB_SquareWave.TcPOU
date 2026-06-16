@@ -1,0 +1,140 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="FB_SquareWave" Id="{fc862dbd-24a6-455b-8d9d-d510a8776d3f}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SquareWave
+VAR_INPUT
+	RefLevelHi : INT := 0;
+	RefLevelLo : INT := 0;
+	bGoToOffState : BOOL := FALSE;
+END_VAR
+VAR_OUTPUT
+	OutRef : INT :=0;
+		nCycles : DINT := 0;
+
+END_VAR
+VAR
+	eStateMachine		: E_SquareWave :=E_SquareWave.GoToNextState_levelHi;
+	nCounterState1		: INT;
+	nCounterState2		: INT;
+//	nCounterState3		: INT;
+	fbTimer				: TON;
+	tGoToNextState1		: TIME := T#0.5S;
+	tGoToNextState2		: TIME := T#0.8S;
+	fbTrigger			: R_TRIG;
+//	bGoToNextState		: BOOL;
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Execute" Id="{11516812-48d9-4f8a-ac94-b9dd88bf0de0}">
+      <Declaration><![CDATA[METHOD Execute : BOOL
+VAR_INPUT
+	bCyclicMode : BOOL := FALSE; 
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE eStateMachine OF
+	
+E_SquareWave.GoToNextState_Off:
+	OutRef:=0;
+	
+E_SquareWave.GoToNextState_levelHi:
+	// Increase counter to show that state 1 is active
+	nCounterState1 := nCounterState1 + 1;
+	OutRef := RefLevelHi;
+	// Call timer FB with the desired time parameter
+	// In the first execution of this state, "fbTimer" is activated by a rising edge at the execute input "IN".
+	// PLEASE REMARK: Afterwards, the FB has to be called in each following cycle until the time has run off.
+	// When the time has run off, the output Q becomes TRUE and the timer FB is called with an input reset.
+	// Then, the FB does not have to be called anymore - until it should be activated with a rising edge at the execute input again.
+	fbTimer(IN := TRUE,
+			PT := tGoToNextState1);
+			
+	// Check if the time has run off
+	IF fbTimer.Q THEN
+		fbTimer(IN := FALSE);											// Reset timer FB by resetting the execute input "IN"
+		eStateMachine := E_SquareWave.GoToNextState_levelLo;	// Switch to next state
+	nCycles:=nCycles+1;
+	END_IF
+
+E_SquareWave.GoToNextState_levelLo:
+	// Increase counter to show that state 1 is active
+	nCounterState2 := nCounterState2 + 1;
+	OutRef := RefLevelLo;
+
+	fbTimer(IN := TRUE,
+			PT := tGoToNextState1);
+			
+	// Check if the time has run off
+	IF fbTimer.Q THEN
+		fbTimer(IN := FALSE);											// Reset timer FB by resetting the execute input "IN"
+		eStateMachine := E_SquareWave.GoToNextState_levelHi;	// Switch to next state
+	END_IF
+	
+	
+END_CASE
+
+// Call trigger FB to detect a rising edge of the connected variable/condition
+// => User interaction necessary: To switch to the next state, write the variable "bGoToNextState" to TRUE
+fbTrigger(CLK := bGoToOffState);
+
+// Check if the trigger detected a rising edge
+IF fbTrigger.Q THEN
+//	bGoToNextState	:= FALSE;										// Reset control variable
+	eStateMachine	:= E_SquareWave.GoToNextState_Off;		// Switch to next state
+END_IF
+ServoCtrl.TargetTorque := OutRef;
+IF bCyclicMode THEN
+	ServoCtrl.ModeOfOperation := TO_SINT(E_ModesOfOperation.ED_MO_Cyclic_sync_torque_mode);
+ELSE
+	ServoCtrl.ModeOfOperation := TO_SINT(E_ModesOfOperation.ED_MO_Torque_profile_mode);
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Restart" Id="{f65648aa-4349-46ec-b419-c8e0af5cbbdf}">
+      <Declaration><![CDATA[METHOD Restart : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[		nCycles   := 0;
+		eStateMachine :=E_SquareWave.GoToNextState_levelHi;
+		
+		]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SquareWave">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SquareWave.Execute">
+      <LineId Id="6" Count="1" />
+      <LineId Id="52" Count="2" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="12" Count="1" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="14" Count="6" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="22" Count="3" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="28" Count="12" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="9" Count="1" />
+      <LineId Id="42" Count="9" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="60" Count="1" />
+      <LineId Id="69" Count="1" />
+      <LineId Id="58" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SquareWave.Restart">
+      <LineId Id="6" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="7" Count="1" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

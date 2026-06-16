@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <DUT Name="E_SquareWave" Id="{d40c5647-273d-49d3-bc2f-178d18f9198d}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_SquareWave :
+(
+	GoToNextState_levelHi := 1,
+	GoToNextState_levelLo :=2,
+	GoToNextState_Off :=3
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

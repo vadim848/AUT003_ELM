@@ -1,0 +1,334 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <POU Name="MAIN" Id="{667a94b4-36b8-4b83-a8df-d6cb82bbcdc7}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+
+testType : E_Tests :=E_Tests.E_Position_Csp;// E_Tests.E_Velocity_Csv;//E_Tests.E_Position_Csp;//E_Tests.E_Current_SinWaveTest;//E_Tests.E_Position_Ptp;
+
+ApplyPosTargetNow : BOOL := FALSE;
+//ModeOfOperation : SINT := TO_SINT(E_ModesOfOperation.ED_MO_Cyclic_sync_torque_mode);// ED_MO_Cyclic_sync_torque_mode
+bInitDone : BOOL :=FALSE;
+bInitDone_w : BOOL :=FALSE;//finished SDO download to slave
+
+valueA : UDINT;
+sNetId     : T_AmsNetId := '5.53.59.176.4.1'; // '5.53.59.176.1.1';
+nSlaveAddr : UINT := 1001;
+//fbSdoRead  : FB_EcCoESdoRead;
+//sdo1_err : BOOL;
+//sdo1_nErrId : UDINT;
+//sdo1_value  :  UDINT;
+//sdo1_value_size  :  UDINT := SIZEOF(sdo1_value);
+
+TorCmd_ds402  :  INT :=0;
+TorCmdMax_Ds402 :  UINT :=0;
+TorCmdA : REAL := 4;
+TorCmdMaxA : REAL := 17;
+FreqScale : REAL := 0.25;
+ProfParams: Ds402_Params;// uploaded from slave
+ProfParams_w: Ds402_Params;// to download to slave
+// State machine
+fbSquareWave		: FB_SquareWave;
+fbMusic : FB_SineSeq;
+fbInitSDO_w : InitSDO_w;// write SDO to slave
+fbInitSDO : InitSDO;// read SDO from slave
+fbPosTest : FB_PosTest; // position profiler test
+
+	bInit_Sdo_States : BOOL :=TRUE;
+//	indSdo :   USINT :=0;
+//	Sdo_States : ARRAY [0..10] OF CSdo_State ;
+	TaskTotalTime : UDINT;
+	fbGetMasterTs : FB_GetMasterTs;
+	cpu_info : ARRAY [0..10] of ST_CpuCoreInfo;
+	FB_Sequence_DB: FB_Sequence;
+	Profile_CSP_DB: Profil_CSP;
+	
+	
+	
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+TaskTotalTime := F_GetTaskTotalTime(0);// x100ns 
+fbGetMasterTs();
+F_GetCpuCoreInfo(0,ADR(cpu_info[0]));
+F_GetCpuCoreInfo(0,ADR(cpu_info[1]));
+ 
+(*
+IF bInit_Sdo_States AND fbGetMasterTs.MasterTsUsec> 0 THEN
+	fbInitSDO(sNetId:=sNetId,nSlaveAddr:=nSlaveAddr);
+	fbInitSDO.Init();
+
+	CASE fbGetMasterTs.MasterTsUsec OF
+	100:
+		ProfParams_w.Interpolation_time_period0x60C2_1_period := 10;
+		ProfParams_w.Interpolation_time_period0x60C2_2_period := -5;
+	200:
+		ProfParams_w.Interpolation_time_period0x60C2_1_period := 20;
+		ProfParams_w.Interpolation_time_period0x60C2_2_period := -5;
+		
+	250:
+		ProfParams_w.Interpolation_time_period0x60C2_1_period := 25;
+		ProfParams_w.Interpolation_time_period0x60C2_2_period := -5;
+	
+	500:
+		ProfParams_w.Interpolation_time_period0x60C2_1_period := 5;
+		ProfParams_w.Interpolation_time_period0x60C2_2_period := -4;
+	1000:
+		ProfParams_w.Interpolation_time_period0x60C2_1_period := 1;
+		ProfParams_w.Interpolation_time_period0x60C2_2_period := -3;
+	END_CASE
+	ProfParams_w.Postion_window0x6067 := 200;
+	ProfParams_w.Position_window_time0x6068 := 1000;
+	
+	ProfParams_w.Abort_connection_option_code_0x6007 := 16#0002;
+	
+	fbInitSDO_w(sNetId:=sNetId,nSlaveAddr:=nSlaveAddr,ProfParams:=ProfParams_w);
+	fbInitSDO_w.Init();
+	//FreqScale := 0.25 * 1000.0 / INT_TO_REAL(fbGetMasterTs.MasterTsUsec)   ;
+	bInit_Sdo_States:= FALSE;
+END_IF
+
+IF NOT bInit_Sdo_States THEN
+	fbInitSDO_w.writeSDO();
+	bInitDone_w := fbInitSDO_w.bInitDone;
+	IF bInitDone_w THEN
+	fbInitSDO.readSDO();
+	bInitDone := fbInitSDO.bInitDone;
+	END_IF
+END_IF
+*)
+bInitDone:= TRUE;
+//TestTorqueProfile();
+IF bInitDone THEN
+	ProfParams:= fbInitSDO.ProfParams;
+	
+	//IF ProfParams.Motor_rated_torque0x6076 > 0 THEN
+	//	TorCmd_ds402  := TRUNC_INT( TorCmdA * 1E6 / UDINT_TO_REAL(ProfParams.Motor_rated_torque0x6076));// TC*10e6/0x6076
+	//	TorCmdMax_Ds402:=INT_TO_UINT( TRUNC_INT( TorCmdMaxA * 1E6 / UDINT_TO_REAL(ProfParams.Motor_rated_torque0x6076)));// TC*10e6/0x6076
+	//ELSE 
+	//	TorCmd_ds402  :=0;TorCmdMax_Ds402:=0;
+	//END_IF
+	TorCmdMax_Ds402:= 65535;//62000;
+	
+	// E_Current_SquareWaveTest->E_Current_SinWaveTest->E_Position_Ptp
+	CASE testType OF
+		E_Tests.E_Current_SquareWaveTest:
+			fbSquareWave(RefLevelHi:= TorCmd_ds402,RefLevelLo:= -TorCmd_ds402);
+			fbSquareWave.Execute(bCyclicMode:=FALSE);
+			IF fbSquareWave.nCycles > 20 THEN
+				fbSquareWave.Restart();
+				testType := E_Tests.E_Current_SinWaveTest;
+			END_IF
+		E_Tests.E_Current_SinWaveTest:
+			fbMusic(Motor_rated_torque0x6076:=ProfParams.Motor_rated_torque0x6076,
+			AmpMax := TorCmdMaxA,FreqScale:= FreqScale);
+			fbMusic.Execute(Mode_of_operation:= E_ModesOfOperation.ED_MO_Cyclic_sync_torque_mode);
+			IF fbMusic.nCycles > 0 THEN
+				fbMusic.Restart();
+				testType := E_Tests.E_Position_Ptp;
+
+			END_IF
+
+		E_Tests.E_Position_Ptp:
+			fbPosTest(PosTargetL:=90000000,PosTargetR:=1000000);
+			fbPosTest.Execute();
+			ApplyPosTargetNow := fbPosTest.ApplyPosTargetNow;
+			IF fbPosTest.nCycles > 5 THEN
+			//	fbPosTest.Restart();
+			//	testType := E_Tests.E_Position_Csp;
+			END_IF
+		E_Tests.E_Position_Csp:
+			
+			fbMusic(Motor_rated_torque0x6076:=ProfParams.Motor_rated_torque0x6076,
+			AmpMax := TorCmdMaxA,FreqScale:= FreqScale*0.75,
+			PosOffset:=3000,PosAmp:= 100000);
+			fbMusic.Execute(Mode_of_operation:= E_ModesOfOperation.ED_MO_Cyclic_sync_position_mode);
+			
+			IF fbMusic.nCycles > 0 THEN
+				fbMusic.Restart();
+			//	testType := E_Tests.E_Current_SquareWaveTest;
+			END_IF
+		E_Tests.E_Velocity_Csv:
+			
+			fbMusic(Motor_rated_torque0x6076:=ProfParams.Motor_rated_torque0x6076,
+			AmpMax := TorCmdMaxA,FreqScale:= FreqScale*0.75,
+			PosOffset:=3000,PosAmp:= 30000);
+			fbMusic.Execute(Mode_of_operation:= E_ModesOfOperation.ED_MO_Cyclic_sync_velocity_mode);
+			
+			IF fbMusic.nCycles > 0 THEN
+				fbMusic.Restart();
+			//	testType := E_Tests.E_Current_SquareWaveTest;
+			END_IF
+	
+
+	END_CASE
+	
+
+	ServoCtrl.Max_torque0x6072 := TorCmdMax_Ds402;
+	
+	//ApplyPosTargetNow := FALSE;
+	//IF ServoCtrl.Position > 32000 THEN
+	//	ServoCtrl.PosTarget := 0;
+	//	ApplyPosTargetNow := TRUE;
+	//END_IF
+	//
+	//IF ServoCtrl.Position < 100 THEN
+	//	ServoCtrl.PosTarget := 32100;
+	//	ApplyPosTargetNow := TRUE;
+	//END_IF
+	//
+	//ServoCtrl.PosTarget := ServoCtrl.PosTarget +1;
+	Ds402.StatusWord_Bits := processStatusWord(ServoCtrl.StatusWord);
+	ServoCtrl.ControlWord := MotorOn(Ds402.StatusWord_Bits,ApplyPosTargetNow);
+
+END_IF
+
+
+// Emergancy RED LED from Door
+IF NOT gvl_io.ixEmergancy_Stop
+	THEN
+	gvl_io.qxEPO_Active := TRUE;
+	ELSE
+		gvl_io.qxEPO_Active := FALSE;
+END_IF
+
+
+
+FB_Sequence_DB();
+Prg_WritePersistentVars();
+//Sequence();
+
+//Prg_logEvents();
+Profile_CSP_DB(
+	p_in:= DINT_TO_REAL(gvl_io.Position_sp_test), 
+	pold:= gvl_io.pp, 
+	vold:= gvl_io.pv, 
+	vcc:= gvl_io.vcc_SP, 
+	acc:= gvl_IO.acc_SP, 
+	Ts:= 0.001, 
+	pp=> gvl_io.pp, 
+	pv=> gvl_io.pv);
+
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="574" Count="0" />
+      <LineId Id="576" Count="0" />
+      <LineId Id="583" Count="0" />
+      <LineId Id="585" Count="0" />
+      <LineId Id="589" Count="1" />
+      <LineId Id="1000" Count="0" />
+      <LineId Id="427" Count="0" />
+      <LineId Id="487" Count="0" />
+      <LineId Id="450" Count="0" />
+      <LineId Id="637" Count="0" />
+      <LineId Id="582" Count="0" />
+      <LineId Id="644" Count="2" />
+      <LineId Id="684" Count="2" />
+      <LineId Id="643" Count="0" />
+      <LineId Id="639" Count="0" />
+      <LineId Id="641" Count="1" />
+      <LineId Id="640" Count="0" />
+      <LineId Id="586" Count="0" />
+      <LineId Id="580" Count="1" />
+      <LineId Id="594" Count="0" />
+      <LineId Id="597" Count="1" />
+      <LineId Id="638" Count="0" />
+      <LineId Id="587" Count="0" />
+      <LineId Id="744" Count="1" />
+      <LineId Id="599" Count="0" />
+      <LineId Id="687" Count="0" />
+      <LineId Id="562" Count="1" />
+      <LineId Id="561" Count="0" />
+      <LineId Id="448" Count="0" />
+      <LineId Id="295" Count="0" />
+      <LineId Id="591" Count="1" />
+      <LineId Id="568" Count="1" />
+      <LineId Id="566" Count="0" />
+      <LineId Id="453" Count="1" />
+      <LineId Id="351" Count="0" />
+      <LineId Id="572" Count="0" />
+      <LineId Id="593" Count="0" />
+      <LineId Id="343" Count="0" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="355" Count="0" />
+      <LineId Id="488" Count="1" />
+      <LineId Id="358" Count="0" />
+      <LineId Id="345" Count="0" />
+      <LineId Id="396" Count="0" />
+      <LineId Id="359" Count="0" />
+      <LineId Id="362" Count="0" />
+      <LineId Id="361" Count="0" />
+      <LineId Id="998" Count="1" />
+      <LineId Id="760" Count="0" />
+      <LineId Id="729" Count="1" />
+      <LineId Id="733" Count="1" />
+      <LineId Id="746" Count="1" />
+      <LineId Id="749" Count="0" />
+      <LineId Id="748" Count="0" />
+      <LineId Id="735" Count="0" />
+      <LineId Id="737" Count="2" />
+      <LineId Id="751" Count="2" />
+      <LineId Id="761" Count="0" />
+      <LineId Id="754" Count="0" />
+      <LineId Id="750" Count="0" />
+      <LineId Id="740" Count="3" />
+      <LineId Id="756" Count="3" />
+      <LineId Id="755" Count="0" />
+      <LineId Id="806" Count="0" />
+      <LineId Id="816" Count="0" />
+      <LineId Id="807" Count="0" />
+      <LineId Id="818" Count="0" />
+      <LineId Id="808" Count="0" />
+      <LineId Id="859" Count="0" />
+      <LineId Id="809" Count="2" />
+      <LineId Id="815" Count="0" />
+      <LineId Id="861" Count="1" />
+      <LineId Id="913" Count="0" />
+      <LineId Id="864" Count="1" />
+      <LineId Id="867" Count="5" />
+      <LineId Id="805" Count="0" />
+      <LineId Id="804" Count="0" />
+      <LineId Id="731" Count="0" />
+      <LineId Id="521" Count="1" />
+      <LineId Id="397" Count="0" />
+      <LineId Id="204" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="100" Count="2" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="725" Count="0" />
+      <LineId Id="356" Count="0" />
+      <LineId Id="1136" Count="0" />
+      <LineId Id="1135" Count="0" />
+      <LineId Id="1127" Count="0" />
+      <LineId Id="1126" Count="0" />
+      <LineId Id="1128" Count="0" />
+      <LineId Id="1130" Count="2" />
+      <LineId Id="1129" Count="0" />
+      <LineId Id="1137" Count="0" />
+      <LineId Id="1134" Count="0" />
+      <LineId Id="954" Count="1" />
+      <LineId Id="1228" Count="0" />
+      <LineId Id="1046" Count="0" />
+      <LineId Id="1183" Count="0" />
+      <LineId Id="1182" Count="0" />
+      <LineId Id="1273" Count="7" />
+      <LineId Id="1081" Count="0" />
+      <LineId Id="1079" Count="0" />
+      <LineId Id="1056" Count="0" />
+      <LineId Id="357" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,141 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="InitSDO" Id="{23eaa7d1-2bec-4d5e-b2e5-899bd36c63b6}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK InitSDO
+VAR_INPUT
+//	bInit_Sdo_States : BOOL;
+	sNetId     : T_AmsNetId;
+	nSlaveAddr : UINT;
+
+END_VAR
+VAR_OUTPUT
+	Sdo_States : ARRAY [0..10] OF CSdo_State ;
+	bInitDone  : BOOL := FALSE;
+	ProfParams : Ds402_Params;
+	bError : BOOL:=FALSE;
+END_VAR
+VAR
+	fbSdoRead  : FB_EcCoESdoRead;
+	indSdo :   USINT :=0;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Init" Id="{e75b12c3-c2e1-4617-86fa-5f20829399cf}">
+      <Declaration><![CDATA[METHOD Init : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//IF bInit_Sdo_States THEN
+	Sdo_States[0].pBuf   	:= ADR(ProfParams.vendorId_0x1081_1);
+    Sdo_States[0].nBufLen 	:=SIZEOF(ProfParams.vendorId_0x1081_1);
+	Sdo_States[0].nIndex 	:=16#1018;
+	Sdo_States[0].nSubIndex :=1;
+
+	Sdo_States[1].pBuf   	:= ADR(ProfParams.Abort_connection_option_code_0x6007);
+    Sdo_States[1].nBufLen 	:=SIZEOF(ProfParams.Abort_connection_option_code_0x6007);
+	Sdo_States[1].nIndex 	:=16#6007;
+	Sdo_States[1].nSubIndex :=0;
+
+	Sdo_States[2].pBuf   	:= ADR(ProfParams.Motor_rated_torque0x6076);
+    Sdo_States[2].nBufLen 	:=SIZEOF(ProfParams.Motor_rated_torque0x6076);
+	Sdo_States[2].nIndex 	:=16#6076;
+	Sdo_States[2].nSubIndex :=0;
+	
+
+	Sdo_States[3].pBuf   	:= ADR(ProfParams.Position_window_time0x6068);
+    Sdo_States[3].nBufLen 	:=SIZEOF(ProfParams.Position_window_time0x6068);
+	Sdo_States[3].nIndex 	:=16#6068;
+	Sdo_States[3].nSubIndex :=0;
+	
+	//
+	Sdo_States[4].pBuf   	:= ADR(ProfParams.Torque_slope0x6087);
+    Sdo_States[4].nBufLen 	:=SIZEOF(ProfParams.Torque_slope0x6087);
+	Sdo_States[4].nIndex 	:=16#6087;
+	Sdo_States[4].nSubIndex :=0;
+//
+
+//
+	Sdo_States[5].pBuf   	:= ADR(ProfParams.Interpolation_time_period0x60C2_1_period);
+    Sdo_States[5].nBufLen 	:=SIZEOF(ProfParams.Interpolation_time_period0x60C2_1_period);
+	Sdo_States[5].nIndex 	:=16#60C2;
+	Sdo_States[5].nSubIndex :=1;
+//
+	Sdo_States[6].pBuf   	:= ADR(ProfParams.Interpolation_time_period0x60C2_2_period);
+    Sdo_States[6].nBufLen 	:=SIZEOF(ProfParams.Interpolation_time_period0x60C2_2_period);
+	Sdo_States[6].nIndex 	:=16#60C2;
+	Sdo_States[6].nSubIndex :=2;
+
+
+
+	
+//	bInit_Sdo_States:= FALSE;
+	bInitDone:=FALSE;
+
+//END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="readSDO" Id="{66b3f423-2246-4f2e-8cb0-e9e0ef196f2b}">
+      <Declaration><![CDATA[METHOD readSDO : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF Sdo_States[indSdo].nBufLen > 0 THEN
+	fbSdoRead(sNetId:= sNetId,nSlaveAddr :=nSlaveAddr, nIndex:=Sdo_States[indSdo].nIndex,
+ 			nSubIndex :=Sdo_States[indSdo].nSubIndex,
+	 		pDstBuf:= Sdo_States[indSdo].pBuf, cbBufLen:=Sdo_States[indSdo].nBufLen,bExecute:=Sdo_States[indSdo].bExecute);
+	IF NOT fbSdoRead.bBusy THEN
+		Sdo_States[indSdo].bExecute := FALSE;
+		IF NOT fbSdoRead.bError THEN 
+			(* read successful *)
+			Sdo_States[indSdo].bError := FALSE;
+			Sdo_States[indSdo].nErrId := 0;
+		ELSE 
+			(* read failed *)
+			Sdo_States[indSdo].bError := fbSdoRead.bError;
+			Sdo_States[indSdo].nErrId := fbSdoRead.nErrId;
+		END_IF
+		fbSdoRead(bExecute:=Sdo_States[indSdo].bExecute);
+		bError := bError OR Sdo_States[indSdo].bError;
+		indSdo := indSdo+1;
+	END_IF
+ELSE
+	bInitDone:= TRUE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="InitSDO">
+      <LineId Id="56" Count="0" />
+    </LineIds>
+    <LineIds Name="InitSDO.Init">
+      <LineId Id="6" Count="0" />
+      <LineId Id="75" Count="3" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="56" Count="3" />
+      <LineId Id="62" Count="10" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="83" Count="5" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="11" Count="9" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="26" Count="1" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="28" Count="0" />
+    </LineIds>
+    <LineIds Name="InitSDO.readSDO">
+      <LineId Id="6" Count="15" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="22" Count="3" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="26" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

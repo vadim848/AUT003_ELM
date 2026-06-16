@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="TestTorqueProfile" Id="{3f6cf7d5-b6f9-460f-bfd8-22f60a81aa8e}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM TestTorqueProfile
+VAR
+TorCmdMax : DINT := TRUNC( 3.0 * 1E6 / 10000);// TC*10e6/0x6076
+MyTime : INT :=0;
+tTimerValue     : LTIME ;//:= T#0S;
+tTimeHr : UDINT;
+END_VAR
+
+
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+//IF ServoCtrl.TargetTorque > TorCmdMax THEN
+//	Ds402.DirUp := FALSE;
+//END_IF
+//
+//IF ServoCtrl.TargetTorque < -TorCmdMax THEN
+//	Ds402.DirUp := TRUE;
+//END_IF
+//		
+//IF Ds402.DirUp THEN 
+//	ServoCtrl.TargetTorque := ServoCtrl.TargetTorque+1;
+//ELSE
+//	ServoCtrl.TargetTorque := ServoCtrl.TargetTorque-1;
+//END_IF
+
+tTimerValue := LTIME();
+tTimeHr := LTIME_TO_UDINT(tTimerValue) MOD  67108864 ;// 
+
+MyTime := (MyTime +1) MOD  2048 ;
+//for Ts=100usec: ServoCtrl.TargetTorque := TRUNC_INT( TorCmdMax * SIN(  tTimeHr * 6.28 *32.0 / 67108864.0 ));
+
+// for Ts = 1ms
+ServoCtrl.TargetTorque := TRUNC_INT( TorCmdMax * SIN(  tTimeHr * 6.28 *4.0 / 67108864.0 ));
+
+// ServoCtrl.TargetTorque := TRUNC_INT( TorCmdMax * SIN(  MyTime * 6.28 * 25  / 2048.0 ));
+]]></ST>
+    </Implementation>
+    <LineIds Name="TestTorqueProfile">
+      <LineId Id="5" Count="0" />
+      <LineId Id="31" Count="6" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="45" Count="1" />
+      <LineId Id="48" Count="1" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="88" Count="1" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="61" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

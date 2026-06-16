@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <DUT Name="E_Tests" Id="{7821c34e-c532-4079-813c-6b394c83bc2b}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_Tests :
+(
+	E_Current_SquareWaveTest := 1,
+	E_Current_SinWaveTest := 2,
+	E_Position_Ptp := 3,
+	E_Position_Csp := 4,
+	E_Velocity_Csv :=5
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

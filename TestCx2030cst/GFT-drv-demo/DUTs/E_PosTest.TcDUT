@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <DUT Name="E_PosTest" Id="{3fe16123-87a5-4b15-9302-05b0cfbb18fc}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_PosTest :
+(
+	Idle_start :=0,
+	GoToNextState_levelHi := 1,
+	GoToNextState_levelLo := 2,
+	MovingTo_levelHi :=3,
+	MovingTo_levelLo :=4,
+	Idle_init :=5
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

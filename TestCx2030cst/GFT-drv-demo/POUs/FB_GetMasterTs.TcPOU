@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="FB_GetMasterTs" Id="{0771b7ec-c875-475d-8663-3233f5e9cd06}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_GetMasterTs
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+	MasterTsUsec: INT :=0;
+END_VAR
+VAR
+	prevTaskTime : ULINT;//100 ns
+	nowTaskTime  : ULINT;//100 ns
+	nCycles : ULINT :=0;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[prevTaskTime := nowTaskTime;
+nowTaskTime  := F_GetTaskTime();
+IF nCycles>0 THEN
+MasterTsUsec := ULINT_TO_INT( (nowTaskTime-prevTaskTime))/10;
+END_IF
+nCycles := nCycles+1;]]></ST>
+    </Implementation>
+    <LineIds Name="FB_GetMasterTs">
+      <LineId Id="11" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="28" Count="1" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

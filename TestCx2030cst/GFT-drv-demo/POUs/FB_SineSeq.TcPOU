@@ -1,0 +1,235 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <POU Name="FB_SineSeq" Id="{afe5e2ee-a5d0-4ae4-8dfb-700248d4f42b}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SineSeq
+VAR_INPUT
+//	RefLevelHi : INT := 0;
+//	RefLevelLo : INT := 0;
+//	bGoToOffState : BOOL := FALSE;
+	Motor_rated_torque0x6076 : UDINT;
+	AmpMax : REAL ;
+	bSingleFreq :BOOL:=FALSE;
+	SingleFreqHz : REAL:=100; 
+	FreqScale : REAL :=0.25;
+	PosOffset : DINT :=0;
+	PosAmp 		: UDINT :=0;
+	
+END_VAR
+VAR_OUTPUT
+	OutRef : INT :=0;
+	OutRefP : DINT :=0;
+	
+		nCycles : DINT := 0;
+
+END_VAR
+VAR
+	Amp  : REAL := 0;
+	FreqHz : REAL := 1;
+	nFullCycles : REAL;
+	Ph : real :=0;
+	ind : INT :=0;
+ //TorCmdMax : DINT := TRUNC( 3.0 * 1E6 / 10000);// TC*10e6/0x6076
+ tTimerValue     : LTIME ;//:= T#0S;
+ tTimeHr,tTimeHrPrev : UDINT;
+ dTTimeHr : UDINT;
+	eStateMachine		: E_SquareWave;
+	nCounterState1		: INT;
+	nCounterState2		: INT;
+//	nCounterState3		: INT;
+	fbTimer				: TON;
+	tGoToNextState1		: TIME := T#2.0S;
+//	tGoToNextState2		: TIME := T#0.8S;
+		duration: TIME := T#1.0S;
+//	fbTrigger			: R_TRIG;
+//	bGoToNextState		: BOOL;
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Execute" Id="{2914dd9d-3949-4a0f-8a7c-5a8e65fcc097}">
+      <Declaration><![CDATA[METHOD Execute : BOOL
+VAR_INPUT
+	Mode_of_operation  : E_ModesOfOperation ;
+END_VAR
+VAR
+	TorCmd_ds402 : INT;
+//	w : REAL;
+	F : REAL;
+//	Profile_CSP_DB: Profil_CSP;
+	
+	
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//IF eStateMachine  = E_SquareWave.GoToNextState_levelHi THEN
+	fbTimer(IN := TRUE,
+			PT := duration);
+	//eStateMachine := E_SquareWave.GoToNextState_levelLo;
+//END_IF
+			
+	// Check if the time has run off
+	IF fbTimer.Q THEN
+		fbTimer(IN := FALSE);											// Reset timer FB by resetting the execute input "IN"
+		//eStateMachine := E_SquareWave.GoToNextState_levelLo;	// Switch to next state
+		ind	:=ind+1;
+	END_IF
+
+	
+
+IF FurElise.FurElise[ind].note <> E_Notes.STOP AND ind < 100 THEN
+	IF FurElise.FurElise[ind].note = E_Notes.pause THEN
+			Amp := 0;
+	ELSE
+			Amp := AmpMax;
+	END_IF
+	F := FurElise.FurElise[ind].note;
+	FreqHz := F * FreqScale;
+	IF bSingleFreq THEN
+		FreqHz := SingleFreqHz;
+	END_IF
+		
+	nFullCycles := INT_TO_REAL( TRUNC_INT(FreqHz*1E-9* UDINT_TO_REAL(16#40000000)) );
+
+	// duration = 1000 / tempo (ms)
+	duration := tGoToNextState1 / FurElise.FurElise[ind].tempo;
+	//ind:=ind+1;
+ELSE
+	ind:=0;// infinite
+	nCycles := nCycles+1;
+END_IF
+
+tTimerValue := LTIME();
+
+tTimeHrPrev := tTimeHr;
+tTimeHr := LTIME_TO_UDINT(tTimerValue) MOD  16#40000000 ;
+dTTimeHr :=(tTimeHr-tTimeHrPrev);// [nsec]
+// for Ts = 1ms
+Ph:=UDINT_TO_REAL( tTimeHr) * 6.283185307179586 *nFullCycles / UDINT_TO_REAL(16#40000000);
+//for Ts=100usec: ServoCtrl.TargetTorque := TRUNC_INT( TorCmdMax * SIN(  tTimeHr * 6.28 *32.0 / 67108864.0 ));
+
+CASE  Mode_of_operation OF
+E_ModesOfOperation.ED_MO_Cyclic_sync_position_mode:
+		OutRefP := TRUNC( UDINT_TO_REAL(PosAmp) * SIN( Ph )) + PosOffset;
+		ServoCtrl.TargetTorque := 0;
+		//ServoCtrl.PosTarget := OutRefP;
+		(*Profile_CSP_DB(
+	p_in:= gvl_io.Position_sp_test, 
+	pold:= , 
+	vold:= , 
+	vcc:= 100, 
+	acc:= 100, 
+	Ts:= 0.001);*)
+	
+	
+	(*
+	Profile_CSP_DB(
+	p_in:= DINT_TO_REAL(gvl_io.Position_sp_test), 
+	pold:= gvl_io.pp, 
+	vold:= gvl_io.pv, 
+	vcc:= gvl_io.vcc_SP, 
+	acc:= gvl_IO.acc_SP, 
+	Ts:= 0.001, 
+	pp=> gvl_io.pp, 
+	pv=> gvl_io.pv);
+		*)
+		
+		//ServoCtrl.PosTarget := gvl_io.Position_sp_test;
+		ServoCtrl.PosTarget := REAL_TO_DINT(gvl_io.pp);
+E_ModesOfOperation.ED_MO_Cyclic_sync_torque_mode:
+		TorCmd_ds402  := TRUNC_INT( Amp * 1E6 / UDINT_TO_REAL(Motor_rated_torque0x6076));// TC*10e6/0x6076
+		OutRef := TRUNC_INT( TorCmd_ds402 * SIN( Ph ));
+		ServoCtrl.TargetTorque := OutRef;
+E_ModesOfOperation.ED_MO_Cyclic_sync_velocity_mode:
+		OutRefP := TRUNC( UDINT_TO_REAL(PosAmp) * SIN( Ph )) ;
+		ServoCtrl.TargetTorque := 0;
+		ServoCtrl.Target_velocity0x60FF := OutRefP;
+
+END_CASE
+ServoCtrl.ModeOfOperation := TO_SINT(Mode_of_operation);
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Restart" Id="{0582219a-86c8-4a43-a7ae-752c3b94b455}">
+      <Declaration><![CDATA[METHOD Restart : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[	nCycles   := 0;
+	ind  :=0;
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SineSeq">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SineSeq.Execute">
+      <LineId Id="53" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="44" Count="1" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="47" Count="3" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="51" Count="1" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="29" Count="2" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="83" Count="1" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="64" Count="1" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="8" Count="1" />
+      <LineId Id="107" Count="1" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="136" Count="1" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="164" Count="5" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="170" Count="0" />
+      <LineId Id="211" Count="1" />
+      <LineId Id="192" Count="7" />
+      <LineId Id="171" Count="0" />
+      <LineId Id="161" Count="1" />
+      <LineId Id="159" Count="0" />
+      <LineId Id="180" Count="0" />
+      <LineId Id="140" Count="3" />
+      <LineId Id="146" Count="3" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="145" Count="0" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="95" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SineSeq.Restart">
+      <LineId Id="6" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
