@@ -4,11 +4,12 @@
     <Declaration><![CDATA[PROGRAM Prg_logEvents
 VAR CONSTANT
 	{IF defined (PLC)}
-		//FilePathAndName: STRING:='\Temp\Log.xls';	
+		FilePathAndName: STRING:='\Temp\Log.xls';	
 	{ELSIF defined (Develop)}
-		FilePathAndName: STRING:='\Temp\Log.xls';		
+		FilePathAndName: STRING:='C:\Users\user\Source\Repos\AUT003_ELM\Export\Log3.csv';		
+		//FilePathAndName: STRING:='.\Export\Log2.csv';		
 	{END_IF}
-	sHeader :STRING:='Date$TTime$TDescrition';
+	sHeader :STRING:='Date$TTime$TCurrent$TDescrition';
 END_VAR
 VAR
 	fbFileOpen					:	FB_FileOpen;

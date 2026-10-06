@@ -98,19 +98,17 @@
 		</System>
 		<Plc>
 			<Project GUID="{E6BAE73C-88AC-4AD8-81DF-CB38321284BE}" Name="GFT-drv-demo" PrjFilePath="GFT-drv-demo\GFT-drv-demo.plcproj" TmcFilePath="GFT-drv-demo\GFT-drv-demo.tmc" EnableImplicitDefines="true" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<ProjectVariant PvUseDisable="true" PvUseDefine="true">
+				<ProjectVariant PvUseDefine="true">
 					<Variant>
 						<Name>Develop</Name>
-						<Disable>0</Disable>
 						<Defines></Defines>
 					</Variant>
 					<Variant>
 						<Name>PLC</Name>
-						<Disable>0</Disable>
 						<Defines/>
 					</Variant>
 				</ProjectVariant>
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="GFT-drv-demo\GFT-drv-demo.tmc" TmcHash="{9AA04590-782E-ADE5-7B6A-93C2E2F4D194}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="GFT-drv-demo\GFT-drv-demo.tmc" TmcHash="{1193812E-64F0-39C2-6FE5-A224FAD85BF5}">
 					<Name>GFT-drv-demo Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">

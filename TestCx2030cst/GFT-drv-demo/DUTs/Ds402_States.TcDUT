@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
   <DUT Name="Ds402_States" Id="{e607a42e-9a9c-4743-ae85-756fb261249f}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 {attribute 'strict'}
@@ -19,6 +19,6 @@ TYPE Ds402_States :
 );
 END_TYPE
 *)
-]]></Declaration>
+;]]></Declaration>
   </DUT>
 </TcPlcObject>

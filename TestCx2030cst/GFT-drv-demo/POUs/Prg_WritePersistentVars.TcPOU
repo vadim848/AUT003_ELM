@@ -13,16 +13,16 @@ END_VAR
     <Implementation>
       <ST><![CDATA[
 {IF defined (PLC)}
-(*fb_FB_S_UPS(
-	sNetID:='' , 
-	iPLCPort:=851 , 
-	//iplPort:= , 
-	tTimeout:= , 
-	eUpsMode:=eSUPS_WrPersistData_Shutdown , 
-	ePersistentMode:=SPDM_2PASS , 
-	tRecoverTime:= , 
-	bPowerFailDetect=> , 
-	eState=> );	*)
+	fb_FB_S_UPS(
+		sNetID:='' , 
+		iPLCPort:=851 , 
+		//iplPort:= , 
+		tTimeout:= , 
+		eUpsMode:=eSUPS_WrPersistData_Shutdown , 
+		ePersistentMode:=SPDM_2PASS , 
+		tRecoverTime:= , 
+		bPowerFailDetect=> , 
+		eState=> );
 {ELSIF defined (Develop)}
 
 {END_IF}
