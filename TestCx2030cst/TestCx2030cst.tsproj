@@ -101,11 +101,11 @@
 				<ProjectVariant PvUseDefine="true">
 					<Variant>
 						<Name>Develop</Name>
-						<Defines></Defines>
+						<Defines>Develop</Defines>
 					</Variant>
 					<Variant>
 						<Name>PLC</Name>
-						<Defines/>
+						<Defines>PLC</Defines>
 					</Variant>
 				</ProjectVariant>
 				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="GFT-drv-demo\GFT-drv-demo.tmc" TmcHash="{1193812E-64F0-39C2-6FE5-A224FAD85BF5}">

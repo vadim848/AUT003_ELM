@@ -127,7 +127,7 @@ CASE nStep OF
 
 	30, 50:	// write sBuffer: 30 = the header, 50 = one sample line
 		sState := 'writing';
-		fbWrite(sNetId := '', hFile := hFile, pWriteBuff := ADR(sBuffer), cbWriteLen := LEN(sBuffer),
+		fbWrite(sNetId := '', hFile := hFile, pWriteBuff := ADR(sBuffer), cbWriteLen := INT_TO_UDINT(LEN(sBuffer)),
 			bExecute := TRUE, tTimeout := T#5S);
 		IF NOT fbWrite.bBusy THEN
 			IF fbWrite.bError THEN
