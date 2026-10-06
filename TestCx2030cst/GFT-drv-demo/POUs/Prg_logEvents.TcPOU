@@ -4,26 +4,93 @@
     <Declaration><![CDATA[// Adapter between the run sequence and the run log module (RunLog\FB_RunLogger).
 // FB_Sequence keeps raising the same commands it always did - Log_Data, Lod_appendLine_cmd,
 // Log_CloseFile_cmd; how and where a run is written is decided in FB_RunLogger only.
+//
+// Develop variant only: GVL_RunLog.SelfTest drives FB_RunLogger through a scripted run, because
+// on the VM the sequence cannot run (no I/O; Error resets Step to 0 at once).
 PROGRAM Prg_logEvents
 VAR
 	fbRunLogger : FB_RunLogger;
+	bSelfTesting : BOOL;	// always FALSE in the PLC variant
+	{IF defined (Develop)}
+	nTestStep : INT;
+	nTestSamples : INT;
+	nTestTicks : INT;		// 10 ms ticks since the self-test began; gives up after 5 s
+	bTestStart : BOOL;
+	bTestAppend : BOOL;
+	bTestClose : BOOL;
+	{END_IF}
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[GVL_RunLog.SN_valid := F_RunLogSnValid(GVL_RunLog.SN);
 
-fbRunLogger(
-	bStart := gvl_io.Log_Data,
-	bRunActive := gvl_io.Step <> 0,
-	bReset := gvl_io.Reset,
-	sSN := GVL_RunLog.SN,
-	bSnValid := GVL_RunLog.SN_valid,
-	nCyclesSet := gvl_io.Cycle_SP,
-	rCurrent := gvl_io.Motor_I_PV,
-	nPosition := gvl_io.Position_PV_HMI,
-	stNow := Prg_GetClock.stSystemTime,
-	bAppend := gvl_io.Lod_appendLine_cmd,
-	bClose := gvl_io.Log_CloseFile_cmd);
+{IF defined (Develop)}
+IF GVL_RunLog.SelfTest AND nTestStep = 0 THEN
+	nTestStep := 1;
+	nTestSamples := 0;
+	nTestTicks := 0;
+END_IF
+bSelfTesting := nTestStep <> 0;
+IF bSelfTesting THEN
+	nTestTicks := nTestTicks + 1;
+	CASE nTestStep OF
+		1:	// bStart low for one call, so the next call is a rising edge
+			bTestStart := FALSE;
+			nTestStep := 2;
+		2:	bTestStart := TRUE;
+			IF fbRunLogger.sState = 'logging' THEN
+				nTestStep := 3;
+			END_IF
+		3:	// one sample at a time, each after the previous one is written
+			IF NOT bTestAppend AND fbRunLogger.sState = 'logging' THEN
+				IF nTestSamples < 10 THEN
+					nTestSamples := nTestSamples + 1;
+					bTestAppend := TRUE;
+				ELSE
+					bTestClose := TRUE;
+					nTestStep := 4;
+				END_IF
+			END_IF
+		4:	IF NOT bTestClose AND fbRunLogger.sState = 'idle' THEN
+				nTestStep := 5;
+			END_IF
+	END_CASE
+	IF nTestStep = 5 OR nTestTicks > 500 THEN
+		nTestStep := 0;
+		bTestStart := FALSE;
+		bTestAppend := FALSE;
+		bTestClose := FALSE;
+		GVL_RunLog.SelfTest := FALSE;
+	END_IF
+	fbRunLogger(
+		bStart := bTestStart,
+		bRunActive := TRUE,
+		bReset := FALSE,
+		sSN := 'TEST',
+		bSnValid := TRUE,
+		nCyclesSet := 5,
+		rCurrent := 5.0 + 12.5 * INT_TO_REAL(nTestSamples),
+		nPosition := -106 + 10 * nTestSamples,
+		stNow := Prg_GetClock.stSystemTime,
+		bAppend := bTestAppend,
+		bClose := bTestClose);
+END_IF
+{END_IF}
+
+IF NOT bSelfTesting THEN
+	fbRunLogger(
+		bStart := gvl_io.Log_Data,
+		bRunActive := gvl_io.Step <> 0,
+		bReset := gvl_io.Reset,
+		sSN := GVL_RunLog.SN,
+		bSnValid := GVL_RunLog.SN_valid,
+		nCyclesSet := gvl_io.Cycle_SP,
+		rCurrent := gvl_io.Motor_I_PV,
+		nPosition := gvl_io.Position_PV_HMI,
+		stNow := Prg_GetClock.stSystemTime,
+		bAppend := gvl_io.Lod_appendLine_cmd,
+		bClose := gvl_io.Log_CloseFile_cmd);
+END_IF
 
 GVL_RunLog.State := fbRunLogger.sState;
 GVL_RunLog.LastFile := fbRunLogger.sLastFile;
@@ -32,7 +99,7 @@ GVL_RunLog.ErrorCount := fbRunLogger.nErrors;
 ]]></ST>
     </Implementation>
     <LineIds Name="Prg_logEvents">
-      <LineId Id="3" Count="19" />
+      <LineId Id="3" Count="78" />
       <LineId Id="2" Count="0" />
     </LineIds>
   </POU>

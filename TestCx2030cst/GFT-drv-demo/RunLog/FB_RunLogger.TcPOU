@@ -91,6 +91,7 @@ CASE nStep OF
 				sTmpPath := CONCAT(sTmpPath, '.tmp');
 				nSamples := 0;
 				bCompleted := FALSE;
+				sLastError := '';	// a problem of an earlier run does not belong to this one
 				sState := 'opening';
 				nStep := 10;
 			END_IF

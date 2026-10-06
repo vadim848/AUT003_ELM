@@ -10,6 +10,9 @@ VAR_GLOBAL
 	LastFile	: STRING(255);	// last finished run log
 	LastError	: STRING(255);	// last problem; a run without a valid SN is not logged
 	ErrorCount	: UDINT;
+	{IF defined (Develop)}
+	SelfTest	: BOOL;			// VM only: TRUE writes a scripted 10-sample run as <stamp>_TEST.log
+	{END_IF}
 END_VAR
 ]]></Declaration>
   </GVL>
