@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="F_RunLogSnValid" Id="{bbf8ec8b-a805-4011-b4ff-20b1cd818310}" SpecialFunc="None">
+    <Declaration><![CDATA[// TRUE when sSN can go into a file name: 1..32 characters, each A-Z, a-z, 0-9 or '-'.
+// The reader (elm-report) applies the same rule and rejects any other name.
+FUNCTION F_RunLogSnValid : BOOL
+VAR_INPUT
+	sSN : STRING(32);
+END_VAR
+VAR
+	i : INT;
+	c : BYTE;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[F_RunLogSnValid := LEN(sSN) >= 1;
+FOR i := 0 TO LEN(sSN) - 1 DO
+	c := sSN[i];
+	IF NOT ((c >= 16#30 AND c <= 16#39)		// 0-9
+		OR (c >= 16#41 AND c <= 16#5A)		// A-Z
+		OR (c >= 16#61 AND c <= 16#7A)		// a-z
+		OR c = 16#2D)						// -
+	THEN
+		F_RunLogSnValid := FALSE;
+	END_IF
+END_FOR
+]]></ST>
+    </Implementation>
+    <LineIds Name="F_RunLogSnValid">
+      <LineId Id="3" Count="9" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

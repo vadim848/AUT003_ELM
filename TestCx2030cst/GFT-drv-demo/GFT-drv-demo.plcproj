@@ -133,6 +133,16 @@
     <Compile Include="POUs\TestTorqueProfile.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="RunLog\F_RunLogSnValid.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="RunLog\FB_RunLogger.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="RunLog\GVL_RunLog.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
     <Compile Include="Screen\Alarm.TcVIS">
       <SubType>Code</SubType>
       <DependentUpon>Visualization Manager.TcVMO</DependentUpon>
@@ -181,6 +191,7 @@
     <Folder Include="Screen" />
     <Folder Include="VISUs" />
     <Folder Include="POUs" />
+    <Folder Include="RunLog" />
   </ItemGroup>
   <ItemGroup>
     <PlaceholderReference Include="System_VisuElemMeter">

@@ -1,0 +1,203 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="FB_RunLogger" Id="{6f425dea-533a-4860-b2c4-93b89be34738}" SpecialFunc="None">
+    <Declaration><![CDATA[// Writes one run log per run in the AUT003-ELM-LOG/1 format (report-tool/docs/log-format.md).
+//
+// The whole log format lives here; the run sequence only raises bStart, bAppend and bClose,
+// as it did for the old logger. Replace or edit this block without touching FB_Sequence.
+//
+// File life: <dir>\<YYYYMMDD-HHMMSS>_<SN>.tmp while the run is written; renamed to .log when
+// the run completes (bClose). A run that stops early (bRunActive falls, or bReset) keeps its
+// .tmp - the reader never touches a .tmp, so an incomplete run cannot reach a report.
+// A run started without a valid SN is not logged at all (sLastError says so).
+FUNCTION_BLOCK FB_RunLogger
+VAR_INPUT
+	bStart		: BOOL;			// rising edge: open a file for a new run
+	bRunActive	: BOOL;			// falls while a file is open = the run was stopped
+	bReset		: BOOL;			// abandon the open file, keep it as .tmp
+	sSN			: STRING(32);
+	bSnValid	: BOOL;
+	nCyclesSet	: UDINT;		// Cycle_SP; the logged cycle is the last one
+	rCurrent	: REAL;			// Motor_I_PV
+	nPosition	: DINT;			// Position_PV_HMI
+	stNow		: TIMESTRUCT;	// PLC clock, for the file name and the start stamp
+END_VAR
+VAR_IN_OUT
+	bAppend		: BOOL;			// one sample is due; cleared here when taken
+	bClose		: BOOL;			// the run completed; cleared here when taken
+END_VAR
+VAR_OUTPUT
+	bFileOpen	: BOOL;
+	sState		: STRING(40);
+	sLastFile	: STRING(255);
+	sLastError	: STRING(255);
+	nErrors		: UDINT;
+END_VAR
+VAR CONSTANT
+	{IF defined (Develop)}
+		LOG_DIR		: STRING := 'C:\Users\user\Source\Repos\AUT003_ELM\Export\Logs';
+	{ELSE}
+		// On Windows CE only \Hard Disk is on the card; \Temp may be in RAM.
+		LOG_DIR		: STRING := '\Hard Disk\Logs';
+	{END_IF}
+	FORMAT_ID	: STRING := 'AUT003-ELM-LOG/1';
+	SAMPLE_MS	: UDINT := 100;		// FB_Sequence raises bAppend every 100 ms
+END_VAR
+VAR
+	rtStart		: R_TRIG;
+	fbCreateDir	: FB_CreateDir;
+	fbOpen		: FB_FileOpen;
+	fbWrite		: FB_FileWrite;
+	fbClose		: FB_FileClose;
+	fbRename	: FB_FileRename;
+	hFile		: UINT;
+	nStep		: INT;
+	bCompleted	: BOOL;			// TRUE: close then rename; FALSE: close and keep the .tmp
+	nSamples	: UDINT;
+	sStamp		: STRING(20);	// YYYYMMDD-HHMMSS
+	sStartIso	: STRING(20);	// YYYY-MM-DDTHH:MM:SS
+	sTmpPath	: STRING(255);
+	sLogPath	: STRING(255);
+	sBuffer		: STRING(255);	// must not change while fbWrite is busy
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[rtStart(CLK := bStart);
+
+CASE nStep OF
+	0:	// idle; a sample or close request with no file open is simply taken
+		sState := 'idle';
+		bFileOpen := FALSE;
+		bAppend := FALSE;
+		bClose := FALSE;
+		IF rtStart.Q THEN
+			IF NOT bSnValid THEN
+				sLastError := CONCAT('run not logged - no valid SN: ', sSN);
+			ELSE
+				sStamp := CONCAT(WORD_TO_STRING(stNow.wYear), RIGHT(CONCAT('0', WORD_TO_STRING(stNow.wMonth)), 2));
+				sStamp := CONCAT(sStamp, RIGHT(CONCAT('0', WORD_TO_STRING(stNow.wDay)), 2));
+				sStamp := CONCAT(sStamp, '-');
+				sStamp := CONCAT(sStamp, RIGHT(CONCAT('0', WORD_TO_STRING(stNow.wHour)), 2));
+				sStamp := CONCAT(sStamp, RIGHT(CONCAT('0', WORD_TO_STRING(stNow.wMinute)), 2));
+				sStamp := CONCAT(sStamp, RIGHT(CONCAT('0', WORD_TO_STRING(stNow.wSecond)), 2));
+				// YYYYMMDD-HHMMSS -> YYYY-MM-DDTHH:MM:SS
+				sStartIso := CONCAT(CONCAT(LEFT(sStamp, 4), '-'), MID(sStamp, 2, 5));
+				sStartIso := CONCAT(CONCAT(sStartIso, '-'), MID(sStamp, 2, 7));
+				sStartIso := CONCAT(CONCAT(sStartIso, 'T'), MID(sStamp, 2, 10));
+				sStartIso := CONCAT(CONCAT(sStartIso, ':'), MID(sStamp, 2, 12));
+				sStartIso := CONCAT(CONCAT(sStartIso, ':'), MID(sStamp, 2, 14));
+				sTmpPath := CONCAT(CONCAT(CONCAT(LOG_DIR, '\'), sStamp), CONCAT('_', sSN));
+				sLogPath := CONCAT(sTmpPath, '.log');
+				sTmpPath := CONCAT(sTmpPath, '.tmp');
+				nSamples := 0;
+				bCompleted := FALSE;
+				sState := 'opening';
+				nStep := 10;
+			END_IF
+		END_IF
+
+	10:	// the folder may already exist; an error here is not fatal, the open below decides
+		fbCreateDir(sNetId := '', sPathName := LOG_DIR, bExecute := TRUE, tTimeout := T#5S);
+		IF NOT fbCreateDir.bBusy THEN
+			fbCreateDir(bExecute := FALSE);
+			nStep := 20;
+		END_IF
+
+	20:	// binary: the $R$N line ends are written as they are
+		fbOpen(sNetId := '', sPathName := sTmpPath, nMode := FOPEN_MODEWRITE OR FOPEN_MODEBINARY,
+			ePath := PATH_GENERIC, bExecute := TRUE, tTimeout := T#5S);
+		IF NOT fbOpen.bBusy THEN
+			IF fbOpen.bError THEN
+				sLastError := CONCAT('cannot create ', sTmpPath);
+				nErrors := nErrors + 1;
+				nStep := 0;
+			ELSE
+				hFile := fbOpen.hFile;
+				bFileOpen := TRUE;
+				sBuffer := CONCAT(CONCAT('# format=', FORMAT_ID), '$R$N');
+				sBuffer := CONCAT(sBuffer, CONCAT(CONCAT('# sn=', sSN), '$R$N'));
+				sBuffer := CONCAT(sBuffer, CONCAT(CONCAT('# start=', sStartIso), '$R$N'));
+				sBuffer := CONCAT(sBuffer, CONCAT(CONCAT('# cycles_set=', UDINT_TO_STRING(nCyclesSet)), '$R$N'));
+				sBuffer := CONCAT(sBuffer, CONCAT(CONCAT('# logged_cycle=', UDINT_TO_STRING(nCyclesSet)), '$R$N'));
+				sBuffer := CONCAT(sBuffer, 't_ms,current,position_deg$R$N');
+				nStep := 30;
+			END_IF
+			fbOpen(bExecute := FALSE);
+		END_IF
+
+	30, 50:	// write sBuffer: 30 = the header, 50 = one sample line
+		sState := 'writing';
+		fbWrite(sNetId := '', hFile := hFile, pWriteBuff := ADR(sBuffer), cbWriteLen := LEN(sBuffer),
+			bExecute := TRUE, tTimeout := T#5S);
+		IF NOT fbWrite.bBusy THEN
+			IF fbWrite.bError THEN
+				sLastError := CONCAT('write failed, run kept as ', sTmpPath);
+				nErrors := nErrors + 1;
+				bCompleted := FALSE;
+				nStep := 60;
+			ELSE
+				nStep := 40;
+			END_IF
+			fbWrite(bExecute := FALSE);
+		END_IF
+
+	40:	// running: completion first - FB_Sequence ends a run with Step := 0 and bClose together
+		sState := 'logging';
+		IF bClose THEN
+			bClose := FALSE;
+			bAppend := FALSE;
+			bCompleted := TRUE;
+			nStep := 60;
+		ELSIF bReset OR NOT bRunActive THEN
+			sLastError := CONCAT('run stopped, kept as ', sTmpPath);
+			bCompleted := FALSE;
+			nStep := 60;
+		ELSIF bAppend THEN
+			bAppend := FALSE;
+			sBuffer := CONCAT(UDINT_TO_STRING(nSamples * SAMPLE_MS), ',');
+			sBuffer := CONCAT(sBuffer, CONCAT(REAL_TO_STRING(rCurrent), ','));
+			sBuffer := CONCAT(sBuffer, CONCAT(DINT_TO_STRING(nPosition), '$R$N'));
+			nSamples := nSamples + 1;
+			nStep := 50;
+		END_IF
+
+	60:	// close; then rename if the run completed, else leave the .tmp
+		sState := 'closing';
+		fbClose(sNetId := '', hFile := hFile, bExecute := TRUE, tTimeout := T#5S);
+		IF NOT fbClose.bBusy THEN
+			IF fbClose.bError THEN
+				sLastError := CONCAT('close failed: ', sTmpPath);
+				nErrors := nErrors + 1;
+				bCompleted := FALSE;
+			END_IF
+			bFileOpen := FALSE;
+			fbClose(bExecute := FALSE);
+			IF bCompleted THEN
+				nStep := 70;
+			ELSE
+				nStep := 0;
+			END_IF
+		END_IF
+
+	70:	// .tmp -> .log: from now on the run is visible to the report tool
+		fbRename(sNetId := '', sOldName := sTmpPath, sNewName := sLogPath, ePath := PATH_GENERIC,
+			bExecute := TRUE, tTimeout := T#5S);
+		IF NOT fbRename.bBusy THEN
+			IF fbRename.bError THEN
+				sLastError := CONCAT('rename failed, run kept as ', sTmpPath);
+				nErrors := nErrors + 1;
+			ELSE
+				sLastFile := sLogPath;
+			END_IF
+			fbRename(bExecute := FALSE);
+			nStep := 0;
+		END_IF
+END_CASE
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_RunLogger">
+      <LineId Id="3" Count="142" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

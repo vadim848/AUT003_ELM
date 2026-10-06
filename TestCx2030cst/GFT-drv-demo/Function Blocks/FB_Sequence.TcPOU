@@ -344,7 +344,7 @@ CASE GVL_IO.Step OF
 		AND GVL_IO.test_motor_slUP_ok
 		AND GVL_IO.test_Insert_OK
 		AND GVL_IO.test_slowCycle_OK
-		AND GVL_IO.ATP_start_cmd
+		AND GVL_IO.ATP_start_cmd AND GVL_RunLog.SN_valid	// no valid SN, no ATP start
 		THEN
 		GVL_IO.Step := 210;
 		GVL_IO.Cycle_PV := 0;

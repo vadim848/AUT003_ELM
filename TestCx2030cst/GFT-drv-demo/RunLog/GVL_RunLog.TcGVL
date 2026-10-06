@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <GVL Name="GVL_RunLog" Id="{a4edbcce-a196-44ab-9e8c-14b79f4d344e}">
+    <Declaration><![CDATA[// Run log module: what the HMI shows and enters. Format: report-tool/docs/log-format.md
+{attribute 'qualified_only'}
+VAR_GLOBAL
+	SN			: STRING(32);	// part serial number, entered on Overview_ATP before START
+	SN_valid	: BOOL;			// 1..32 characters of A-Z a-z 0-9 -; ATP START needs it
+	State		: STRING(40);	// what the logger is doing now
+	LastFile	: STRING(255);	// last finished run log
+	LastError	: STRING(255);	// last problem; a run without a valid SN is not logged
+	ErrorCount	: UDINT;
+END_VAR
+]]></Declaration>
+  </GVL>
+</TcPlcObject>
