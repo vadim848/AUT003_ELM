@@ -3,11 +3,11 @@
   <POU Name="Prg_logEvents" Id="{94d1c41a-5dab-4638-b414-f70a8e4bc406}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM Prg_logEvents
 VAR CONSTANT
-	//{IF defined (PLC)}
-		FilePathAndName: STRING:='\Temp\Log.xls';	
-	//{ELSIF defined (Develop)}
-	//	FilePathAndName: STRING:='\Temp\Log.xls';		
-	//{END_IF}
+	{IF defined (PLC)}
+		//FilePathAndName: STRING:='\Temp\Log.xls';	
+	{ELSIF defined (Develop)}
+		FilePathAndName: STRING:='\Temp\Log.xls';		
+	{END_IF}
 	sHeader :STRING:='Date$TTime$TDescrition';
 END_VAR
 VAR

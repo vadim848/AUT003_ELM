@@ -88,7 +88,7 @@
 			<ProjectVariant PvUseLink="true">
 				<Variant>
 					<Name>Develop</Name>
-					<TargetNetId></TargetNetId>
+					<TargetNetId/>
 				</Variant>
 				<Variant>
 					<Name>PLC</Name>
@@ -101,12 +101,16 @@
 				<ProjectVariant PvUseDisable="true" PvUseDefine="true">
 					<Variant>
 						<Name>Develop</Name>
-						<Name>PLC</Name>
 						<Disable>0</Disable>
 						<Defines></Defines>
 					</Variant>
+					<Variant>
+						<Name>PLC</Name>
+						<Disable>0</Disable>
+						<Defines/>
+					</Variant>
 				</ProjectVariant>
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="GFT-drv-demo\GFT-drv-demo.tmc" TmcHash="{AF1278DD-E92E-B55A-DE91-147CB0177254}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="GFT-drv-demo\GFT-drv-demo.tmc" TmcHash="{9AA04590-782E-ADE5-7B6A-93C2E2F4D194}">
 					<Name>GFT-drv-demo Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -265,20 +269,10 @@
 							<Priority>21</Priority>
 							<CycleTime>10000000</CycleTime>
 						</Context>
-						<Context>
-							<Id>2</Id>
-							<Name>VISU_TASK</Name>
-							<ManualConfig>
-								<OTCID>#x02010040</OTCID>
-							</ManualConfig>
-							<Priority>30</Priority>
-							<CycleTime>200000000</CycleTime>
-						</Context>
 					</Contexts>
 					<TaskPouOids>
 						<TaskPouOid Prio="8" OTCID="#x08502001"/>
 						<TaskPouOid Prio="21" OTCID="#x08502003"/>
-						<TaskPouOid Prio="30" OTCID="#x08502002"/>
 					</TaskPouOids>
 				</Instance>
 			</Project>

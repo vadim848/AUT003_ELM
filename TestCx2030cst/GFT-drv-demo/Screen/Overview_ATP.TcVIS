@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
   <Visu Name="Overview_ATP" Id="{20f0529a-4252-4240-a646-c547253f7162}">
     <XmlArchive>
       <Data>
@@ -1141,6 +1141,10 @@ DN"</v>
                     </o>
                     <o>
                       <v n="Id">2597686782L</v>
+                      <v n="Value">true</v>
+                    </o>
+                    <o>
+                      <v n="Id">1013868361L</v>
                       <v n="Value">true</v>
                     </o>
                   </l>
@@ -3650,6 +3654,108 @@ And Approve"</v>
                 <o n="VisualElemMemberList" t="VisualElemMemberList">
                   <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
                     <o>
+                      <v n="Id">1931512087L</v>
+                      <v n="Value">"TOGGLE"</v>
+                    </o>
+                    <o>
+                      <v n="Id">300685745L</v>
+                      <v n="Value">false</v>
+                    </o>
+                    <o>
+                      <v n="Id">2812299069L</v>
+                      <v n="Value">4294967295U</v>
+                    </o>
+                    <o>
+                      <v n="Id">494569607L</v>
+                      <v n="Value">4278190080U</v>
+                    </o>
+                    <o>
+                      <v n="Id">3719097617L</v>
+                      <v n="Value">0</v>
+                    </o>
+                    <o>
+                      <v n="Id">1649127785L</v>
+                      <v n="Value">283</v>
+                    </o>
+                    <o>
+                      <v n="Id">357335551L</v>
+                      <v n="Value">15</v>
+                    </o>
+                    <o>
+                      <v n="Id">2422045748L</v>
+                      <v n="Value">53</v>
+                    </o>
+                    <o>
+                      <v n="Id">2134141914L</v>
+                      <v n="Value">48</v>
+                    </o>
+                    <o>
+                      <v n="Id">4062784938L</v>
+                      <v n="Value">"Element-Switch-DipSwitch-Green"</v>
+                    </o>
+                    <o>
+                      <v n="Id">493260384L</v>
+                      <v n="Value">4294967295U</v>
+                    </o>
+                    <o>
+                      <v n="Id">135947015L</v>
+                      <v n="Value">4278190080U</v>
+                    </o>
+                    <o>
+                      <v n="Id">2678395525L</v>
+                      <v n="Value">1U</v>
+                    </o>
+                    <o>
+                      <v n="Id">2340015797L</v>
+                      <v n="Value">"HCENTER"</v>
+                    </o>
+                    <o>
+                      <v n="Id">2565699834L</v>
+                      <v n="Value">"VCENTER"</v>
+                    </o>
+                    <o>
+                      <v n="Id">296037572L</v>
+                      <v n="Value">""</v>
+                    </o>
+                    <o>
+                      <v n="Id">390574330L</v>
+                      <v n="Value">""</v>
+                    </o>
+                    <o>
+                      <v n="Id">571893170L</v>
+                      <v n="Value">""</v>
+                    </o>
+                    <o>
+                      <v n="Id">743958181L</v>
+                      <v n="Value">"GVL_IO.Homing_OK"</v>
+                    </o>
+                    <o>
+                      <v n="Id">2597686782L</v>
+                      <v n="Value">false</v>
+                    </o>
+                  </l>
+                </o>
+                <v n="VisualElementName">"DipSwitch"</v>
+                <v n="VisualElementTypeName">"VisuFbElemDipSwitch"</v>
+                <v n="VisualElementIsRectangle">true</v>
+                <v n="VisualElementIdentifier">"GenElemInst_108"</v>
+                <n n="VisualElementOfflinePaintCommands" />
+                <n n="VisualElementFrameInformation" />
+                <d n="VisualElementInputActions" t="Hashtable" />
+                <v n="VisualElementIdentification">{803cecc1-7482-4b19-ba09-32d489573b49}</v>
+                <v n="VisualElementOwningObjectGuid">{20f0529a-4252-4240-a646-c547253f7162}</v>
+                <a n="LMGuids" et="Guid" />
+                <d n="SubElements" t="Hashtable" />
+                <v n="VisualElementId">2</v>
+                <l n="UserManagementAccessRights" t="ArrayList" />
+              </o>
+              <o>
+                <a n="ConfiguredComplexInputs" et="ComplexInput" />
+                <l n="Elements" t="ArrayList" />
+                <n n="VisualElementDescription" />
+                <o n="VisualElemMemberList" t="VisualElemMemberList">
+                  <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
+                    <o>
                       <v n="Id">571893170L</v>
                       <v n="Value">""</v>
                     </o>
@@ -3725,11 +3831,11 @@ And Approve"</v>
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">106</v>
+                      <v n="Value" t="Int16">855</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">59</v>
+                      <v n="Value" t="Int16">35</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -3976,11 +4082,11 @@ And Approve"</v>
                     </o>
                     <o>
                       <v n="Id">550940142L</v>
-                      <v n="Value">181</v>
+                      <v n="Value">877</v>
                     </o>
                     <o>
                       <v n="Id">1473355128L</v>
-                      <v n="Value">74</v>
+                      <v n="Value">95</v>
                     </o>
                     <o>
                       <v n="Id">493260384L</v>
@@ -4038,6 +4144,10 @@ And Approve"</v>
                     <o>
                       <v n="Id">2880254039L</v>
                       <v n="Value">"GVL_IO.Error = 0"</v>
+                    </o>
+                    <o>
+                      <v n="Id">3560616238L</v>
+                      <v n="Value">"-750"</v>
                     </o>
                   </l>
                 </o>
@@ -4210,7 +4320,7 @@ And Approve"</v>
             </o>
             <v n="DialogDut">{25a30359-15dc-4eaf-baca-c99484c7df27}</v>
           </o>
-          <v n="LastUsedIdForIdentifier">106</v>
+          <v n="LastUsedIdForIdentifier">108</v>
           <o n="TextDocument" t="TextDocument">
             <a n="TextLines" cet="TextLine">
               <o>
@@ -4247,12 +4357,12 @@ And Approve"</v>
             <d2 n="Size" ckt="Int32" cvt="VisualObjectSize">
               <v>0</v>
               <o>
-                <v n="Width">800</v>
+                <v n="Width">1455</v>
                 <v n="Height">482</v>
               </o>
               <v>1</v>
               <o>
-                <v n="Width">800</v>
+                <v n="Width">1455</v>
                 <v n="Height">482</v>
               </o>
             </d2>

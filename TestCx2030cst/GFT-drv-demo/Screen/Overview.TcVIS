@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
   <Visu Name="Overview" Id="{c8af26be-14f3-46be-b772-5a548960db44}">
     <XmlArchive>
       <Data>
@@ -1501,6 +1501,10 @@ DN"</v>
                     </o>
                     <o>
                       <v n="Id">2597686782L</v>
+                      <v n="Value">true</v>
+                    </o>
+                    <o>
+                      <v n="Id">1013868361L</v>
                       <v n="Value">true</v>
                     </o>
                   </l>
@@ -4884,11 +4888,11 @@ SP"</v>
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">104</v>
+                      <v n="Value" t="Int16">855</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">32</v>
+                      <v n="Value" t="Int16">35</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -5135,11 +5139,11 @@ SP"</v>
                     </o>
                     <o>
                       <v n="Id">550940142L</v>
-                      <v n="Value">179</v>
+                      <v n="Value">897</v>
                     </o>
                     <o>
                       <v n="Id">1473355128L</v>
-                      <v n="Value">47</v>
+                      <v n="Value">53</v>
                     </o>
                     <o>
                       <v n="Id">493260384L</v>
@@ -5197,6 +5201,10 @@ SP"</v>
                     <o>
                       <v n="Id">2880254039L</v>
                       <v n="Value">"GVL_IO.Error = 0"</v>
+                    </o>
+                    <o>
+                      <v n="Id">3560616238L</v>
+                      <v n="Value">"-750"</v>
                     </o>
                   </l>
                 </o>
@@ -5406,12 +5414,12 @@ SP"</v>
             <d2 n="Size" ckt="Int32" cvt="VisualObjectSize">
               <v>0</v>
               <o>
-                <v n="Width">800</v>
+                <v n="Width">1455</v>
                 <v n="Height">482</v>
               </o>
               <v>1</v>
               <o>
-                <v n="Width">800</v>
+                <v n="Width">1455</v>
                 <v n="Height">482</v>
               </o>
             </d2>
