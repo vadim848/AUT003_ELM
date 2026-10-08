@@ -37,8 +37,8 @@ VAR CONSTANT
 	{IF defined (Develop)}
 		LOG_DIR		: STRING := 'C:\Users\user\Source\Repos\AUT003_ELM\Export\Logs';
 	{ELSE}
-		// On Windows CE only \Hard Disk is on the card; \Temp may be in RAM.
-		LOG_DIR		: STRING := '\Hard Disk\Logs';
+		// \Hard Disk is the card (\Temp may be RAM); \Hard Disk\ftp is the FTP root, created when FTP is enabled.
+		LOG_DIR		: STRING := '\Hard Disk\ftp\Logs';
 	{END_IF}
 	FORMAT_ID	: STRING := 'AUT003-ELM-LOG/1';
 	SAMPLE_MS	: UDINT := 100;		// FB_Sequence raises bAppend every 100 ms
