@@ -44,7 +44,7 @@
 		<ImageData Id="1002">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000c40e0000c40e00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ff808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff</ImageData>
 		<ImageData Id="1003">424de6000000000000007600000028000000100000000e000000010004000000000070000000251600002516000000000000000000000000000000008000008000000080800080000000800080008080000080808000c0c0c0000000ff0000ff000000ffff00ff000000ff00ff00ffff0000ffffff00fffffffcccccccccfffffffcfffffffcfffffcccccfffffcffffffcccffffffcccccccccccccccfccffffffffffffcfccfaaff9ffffefcfccfafaf9ffffefccccfafaf99fffefcffcfafaf9ffffefcffcfafaf9ffffefcffcfaaff999feeecffcffffffffffffcffccccccccccccccff</ImageData>
 	</ImageDatas>
-	<Project ProjectGUID="{FCDA45F7-2BA3-4AFD-BD55-8AC259F4F52C}" Target64Bit="true" ShowHideConfigurations="#x3c7">
+	<Project ProjectGUID="{FCDA45F7-2BA3-4AFD-BD55-8AC259F4F52C}" TargetNetId="5.144.18.242.1.1" ShowHideConfigurations="#x3c7">
 		<System>
 			<Settings MaxCpus="16" NonWinCpus="8" Packages="4">
 				<Cpu CpuId="15"/>
@@ -88,9 +88,6 @@
 			<ProjectVariant PvUseLink="true">
 				<Variant>
 					<Name>Develop</Name>
-					<TargetNetId/>
-				</Variant>
-				<Variant>
 					<Name>PLC</Name>
 					<TargetNetId>5.144.18.242.1.1</TargetNetId>
 				</Variant>
@@ -101,14 +98,14 @@
 				<ProjectVariant PvUseDefine="true">
 					<Variant>
 						<Name>Develop</Name>
-						<Defines>Develop</Defines>
+						<Defines></Defines>
 					</Variant>
 					<Variant>
 						<Name>PLC</Name>
 						<Defines>PLC</Defines>
 					</Variant>
 				</ProjectVariant>
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="GFT-drv-demo\GFT-drv-demo.tmc" TmcHash="{1193812E-64F0-39C2-6FE5-A224FAD85BF5}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="GFT-drv-demo\GFT-drv-demo.tmc" TmcHash="{8A2B7A18-9387-9DA8-E2F3-D18268C563CD}">
 					<Name>GFT-drv-demo Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -183,12 +180,12 @@
 							<Type>INT</Type>
 						</Var>
 						<Var>
-							<Name>ServoCtrl.ControlWord</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
 							<Name>ServoCtrl.PosTarget</Name>
 							<Type>DINT</Type>
+						</Var>
+						<Var>
+							<Name>ServoCtrl.ControlWord</Name>
+							<Type>UINT</Type>
 						</Var>
 						<Var>
 							<Name>ServoCtrl.ModeOfOperation</Name>
@@ -267,10 +264,20 @@
 							<Priority>21</Priority>
 							<CycleTime>10000000</CycleTime>
 						</Context>
+						<Context>
+							<Id>2</Id>
+							<Name>VISU_TASK</Name>
+							<ManualConfig>
+								<OTCID>#x02010040</OTCID>
+							</ManualConfig>
+							<Priority>30</Priority>
+							<CycleTime>200000000</CycleTime>
+						</Context>
 					</Contexts>
 					<TaskPouOids>
 						<TaskPouOid Prio="8" OTCID="#x08502001"/>
 						<TaskPouOid Prio="21" OTCID="#x08502003"/>
+						<TaskPouOid Prio="30" OTCID="#x08502002"/>
 					</TaskPouOids>
 				</Instance>
 			</Project>
@@ -788,6 +795,7 @@
 		</Variants>
 	</Project>
 	<Mappings>
+		<MappingInfo Identifier="{00000000-2001-0850-0020-500820000403}" Id="#x02030010"/>
 		<OwnerA Name="TIPC^GFT-drv-demo^GFT-drv-demo Instance">
 			<OwnerB Name="TIID^Device 3 (EtherCAT)^Box 1 (DOL Drive)">
 				<Link VarA="PlcTask Inputs^ServoCtrl.ActualCurrent" VarB="TxPdo-Position-Velocity-Torque Mapping^Torque actual value"/>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
   <Visu Name="Graph" Id="{0d08c222-fbb9-47c4-9972-1f2ee75c06ca}">
     <XmlArchive>
       <Data>
@@ -438,15 +438,15 @@
                     </o>
                     <o>
                       <v n="Id">1404881523L</v>
-                      <v n="Value" t="Single">-500</v>
+                      <v n="Value" t="Single">-120</v>
                     </o>
                     <o>
                       <v n="Id">3837067714L</v>
-                      <v n="Value" t="Single">500</v>
+                      <v n="Value" t="Single">0</v>
                     </o>
                     <o>
                       <v n="Id">2867424708L</v>
-                      <v n="Value" t="Single">50</v>
+                      <v n="Value" t="Single">20</v>
                     </o>
                     <o>
                       <v n="Id">440407611L</v>
@@ -482,11 +482,11 @@
                     </o>
                     <o>
                       <v n="Id">993465544L</v>
-                      <v n="Value">62</v>
+                      <v n="Value">40</v>
                     </o>
                     <o>
                       <v n="Id">743178379L</v>
-                      <v n="Value">15</v>
+                      <v n="Value">16</v>
                     </o>
                     <o>
                       <v n="Id">4034249374L</v>
@@ -560,7 +560,7 @@
                     </o>
                     <o>
                       <v n="Id">1500670465L</v>
-                      <v n="Value">"%.0D"</v>
+                      <v n="Value">"%d"</v>
                     </o>
                     <o>
                       <v n="Id">518627256L</v>
@@ -944,7 +944,7 @@
                     </o>
                     <o>
                       <v n="Id">637329562L</v>
-                      <v n="Value">"626"</v>
+                      <v n="Value">"846"</v>
                     </o>
                     <o>
                       <v n="Id">2968286615L</v>
@@ -1045,11 +1045,11 @@
                     </o>
                     <o>
                       <v n="Id">993465544L</v>
-                      <v n="Value">38</v>
+                      <v n="Value">40</v>
                     </o>
                     <o>
                       <v n="Id">743178379L</v>
-                      <v n="Value">15</v>
+                      <v n="Value">16</v>
                     </o>
                     <o>
                       <v n="Id">4034249374L</v>
