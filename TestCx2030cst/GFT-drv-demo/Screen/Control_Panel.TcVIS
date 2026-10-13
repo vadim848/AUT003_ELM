@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
   <Visu Name="Control_Panel" Id="{d1ba7981-a4e0-4872-910a-eaa15cf20fc1}">
     <XmlArchive>
       <Data>
@@ -1608,6 +1608,46 @@
                 <o n="VisualElemMemberList" t="VisualElemMemberList">
                   <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
                     <o>
+                      <v n="Id">571893170L</v>
+                      <v n="Value">""</v>
+                    </o>
+                    <o>
+                      <v n="Id">494569607L</v>
+                      <l n="Value" t="ArrayList" cet="NamedStyleColor">
+                        <o>
+                          <v n="Color">-16777216</v>
+                          <v n="CanonicalName">"BasicElement-Frame-Color"</v>
+                        </o>
+                      </l>
+                    </o>
+                    <o>
+                      <v n="Id">2812299069L</v>
+                      <l n="Value" t="ArrayList" cet="NamedStyleColor">
+                        <o>
+                          <v n="Color">-1</v>
+                          <v n="CanonicalName">"BasicElement-Fill-Color"</v>
+                        </o>
+                      </l>
+                    </o>
+                    <o>
+                      <v n="Id">135947015L</v>
+                      <l n="Value" t="ArrayList" cet="NamedStyleColor">
+                        <o>
+                          <v n="Color">-65536</v>
+                          <v n="CanonicalName">"BasicElement-Alarm-Frame-Color"</v>
+                        </o>
+                      </l>
+                    </o>
+                    <o>
+                      <v n="Id">493260384L</v>
+                      <l n="Value" t="ArrayList" cet="NamedStyleColor">
+                        <o>
+                          <v n="Color">-12337</v>
+                          <v n="CanonicalName">"BasicElement-Alarm-Fill-Color"</v>
+                        </o>
+                      </l>
+                    </o>
+                    <o>
                       <v n="Id">2340015797L</v>
                       <v n="Value">"HCENTER"</v>
                     </o>
@@ -1640,12 +1680,8 @@
                       <v n="Value">4278190080U</v>
                     </o>
                     <o>
-                      <v n="Id">2812299069L</v>
-                      <v n="Value">4294967295U</v>
-                    </o>
-                    <o>
-                      <v n="Id">494569607L</v>
-                      <v n="Value">4278190080U</v>
+                      <v n="Id">1999528970L</v>
+                      <v n="Value">"&lt;toggle/tap variable&gt;"</v>
                     </o>
                     <o>
                       <v n="Id">3719097617L</v>
@@ -1653,23 +1689,19 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">722</v>
+                      <v n="Value">701</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">33</v>
+                      <v n="Value">18</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
-                      <v n="Value">74</v>
+                      <v n="Value">90</v>
                     </o>
                     <o>
                       <v n="Id">2134141914L</v>
-                      <v n="Value">39</v>
-                    </o>
-                    <o>
-                      <v n="Id">390574330L</v>
-                      <v n="Value">"V 1.0"</v>
+                      <v n="Value">48</v>
                     </o>
                     <o>
                       <v n="Id">3729828405L</v>
@@ -1691,43 +1723,51 @@
                       </l>
                     </o>
                     <o>
-                      <v n="Id">493260384L</v>
-                      <v n="Value">4294967295U</v>
+                      <v n="Id">550940142L</v>
+                      <v n="Value">746</v>
                     </o>
                     <o>
-                      <v n="Id">135947015L</v>
-                      <v n="Value">4278190080U</v>
+                      <v n="Id">1473355128L</v>
+                      <v n="Value">42</v>
                     </o>
                     <o>
                       <v n="Id">2678395525L</v>
                       <v n="Value">1U</v>
                     </o>
                     <o>
-                      <v n="Id">571893170L</v>
-                      <v n="Value">""</v>
+                      <v n="Id">564465120L</v>
+                      <v n="Value">"VISU_ST_RECTANGLE"</v>
+                    </o>
+                    <o>
+                      <v n="Id">390574330L</v>
+                      <v n="Value">"%s"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
-                      <v n="Value">"45"</v>
+                      <v n="Value">"364"</v>
+                    </o>
+                    <o>
+                      <v n="Id">2477733581L</v>
+                      <v n="Value">"GVL_RunLog.PLC_VERSION"</v>
                     </o>
                     <o>
                       <v n="Id">2597686782L</v>
-                      <v n="Value">true</v>
+                      <v n="Value">false</v>
                     </o>
                   </l>
                 </o>
-                <v n="VisualElementName">"Label"</v>
-                <v n="VisualElementTypeName">"VisuFbLabel"</v>
+                <v n="VisualElementName">"Rectangle"</v>
+                <v n="VisualElementTypeName">"VisuFbElemSimple"</v>
                 <v n="VisualElementIsRectangle">true</v>
-                <v n="VisualElementIdentifier">"GenElemInst_24"</v>
+                <v n="VisualElementIdentifier">"GenElemInst_25"</v>
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{0c365998-8684-496c-953b-e47027ed5ddc}</v>
+                <v n="VisualElementIdentification">{d9d1470e-acb8-48d3-913f-8a6ac07d3bd6}</v>
                 <v n="VisualElementOwningObjectGuid">{d1ba7981-a4e0-4872-910a-eaa15cf20fc1}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
-                <v n="VisualElementId">3</v>
+                <v n="VisualElementId">20</v>
                 <l n="UserManagementAccessRights" t="ArrayList" />
               </o>
             </l>
@@ -1879,7 +1919,7 @@
             </o>
             <v n="DialogDut">{1a8feecc-8aa3-4cda-b00d-2ac87055b73d}</v>
           </o>
-          <v n="LastUsedIdForIdentifier">24</v>
+          <v n="LastUsedIdForIdentifier">25</v>
           <o n="TextDocument" t="TextDocument">
             <a n="TextLines" cet="TextLine">
               <o>

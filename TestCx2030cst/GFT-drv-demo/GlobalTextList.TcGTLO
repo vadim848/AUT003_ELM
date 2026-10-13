@@ -415,6 +415,11 @@ SP"</v>
               <v n="TextDefault">"V 1.0"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
+            <o>
+              <v n="TextID">"447"</v>
+              <v n="TextDefault">"V1.0"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
           </l>
           <l n="Languages" t="ArrayList" />
           <v n="GuidInit">{fc428871-0bf2-412c-aebe-d0cd107a4bea}</v>

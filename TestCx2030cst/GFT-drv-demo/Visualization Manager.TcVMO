@@ -583,8 +583,8 @@
               <v n="CommBufferSize">50000</v>
               <v n="BestFit">true</v>
               <v n="ClientSizeMode" t="VisualClientSizeMode">Specified</v>
-              <v n="ClientSizeX">1024</v>
-              <v n="ClientSizeY">600</v>
+              <v n="ClientSizeX">800</v>
+              <v n="ClientSizeY">480</v>
               <v n="Antialiasing">true</v>
               <v n="ClientOperationType" t="eDefaultInputSetting">Touchscreen</v>
               <v n="ScaleTypeIsotropic">true</v>

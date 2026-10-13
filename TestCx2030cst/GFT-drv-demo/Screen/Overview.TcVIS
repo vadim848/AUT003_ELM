@@ -1505,7 +1505,7 @@ DN"</v>
                     </o>
                     <o>
                       <v n="Id">1013868361L</v>
-                      <v n="Value">true</v>
+                      <v n="Value">false</v>
                     </o>
                   </l>
                 </o>
@@ -4888,11 +4888,11 @@ SP"</v>
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value" t="Int16">855</v>
+                      <v n="Value" t="Int16">121</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value" t="Int16">35</v>
+                      <v n="Value" t="Int16">47</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -5139,11 +5139,11 @@ SP"</v>
                     </o>
                     <o>
                       <v n="Id">550940142L</v>
-                      <v n="Value">897</v>
+                      <v n="Value">163</v>
                     </o>
                     <o>
                       <v n="Id">1473355128L</v>
-                      <v n="Value">53</v>
+                      <v n="Value">65</v>
                     </o>
                     <o>
                       <v n="Id">493260384L</v>
@@ -5204,7 +5204,7 @@ SP"</v>
                     </o>
                     <o>
                       <v n="Id">3560616238L</v>
-                      <v n="Value">"-750"</v>
+                      <v n="Value">""</v>
                     </o>
                   </l>
                 </o>
@@ -5414,12 +5414,12 @@ SP"</v>
             <d2 n="Size" ckt="Int32" cvt="VisualObjectSize">
               <v>0</v>
               <o>
-                <v n="Width">1455</v>
+                <v n="Width">800</v>
                 <v n="Height">482</v>
               </o>
               <v>1</v>
               <o>
-                <v n="Width">1455</v>
+                <v n="Width">800</v>
                 <v n="Height">482</v>
               </o>
             </d2>
