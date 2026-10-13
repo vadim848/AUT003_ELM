@@ -581,6 +581,8 @@ END_CASE]]></ST>
 		AND GVL_IO.test_slowCycle_OK
 		AND GVL_IO.ATP_start_cmd AND GVL_RunLog.SN_valid	// no valid SN, no ATP start
 		THEN
+		gvl_io.Motor_State_Down	:= FALSE;
+		gvl_io.Motor_State_Up	:= FALSE;
 		GVL_IO.Step := 210;
 		GVL_IO.Cycle_PV := 0;
 	ELSIF GVL_IO.Ready_for_start AND GVL_IO.ixHome_Position
@@ -611,12 +613,14 @@ END_CASE]]></ST>
 	ELSIF GVL_IO.Ready_for_start 
 		AND GVL_IO.Position_PV_HMI <> GVL_IO.Position_UP_SP
 		AND GVL_IO.Motor_UP_slow_cmd
-		THEN		
+		THEN	
+	    gvl_io.Motor_State_Down:= FALSE;
 		GVL_IO.Step := 1010;
 	ELSIF GVL_IO.Ready_for_start 
 		AND GVL_IO.Position_PV_HMI <> GVL_IO.Position_DN_SP
 		AND GVL_IO.Motor_DN_slow_cmd
 		THEN
+		gvl_io.Motor_State_Up:= FALSE;
 		GVL_IO.Step := 1110;		
 	END_IF
 
@@ -881,6 +885,7 @@ END_CASE]]></ST>
 	
 	gvl_io.vcc_SP := gvl_io.Speed_SP_slow * (46603  * 124 );
 	gvl_io.acc_SP := gvl_io.Accseleration_SP_slow * (46603 *124);
+	gvl_io.Motor_State_Down:= FALSE;
 	GVL_IO.Step := 1015;
 	Delay := TRUE;
 	
@@ -899,12 +904,14 @@ END_CASE]]></ST>
 		OR (GVL_IO.Position_PV_HMI >= gvl_io.Position_UP_SP_LL AND GVL_IO.Position_PV_HMI <= gvl_io.Position_UP_SP_HL )
 		THEN		
 		gvl_io.test_motor_slUP_ok := TRUE;
+		gvl_io.Motor_State_Up:= TRUE;
 		GVL_IO.Step := 0;
 	END_IF
 	
 	1110:	//MOtor DN command - write parameters
 	gvl_io.vcc_SP := gvl_io.Speed_SP_slow * (46603  * 124 );
 	gvl_io.acc_SP := gvl_io.Accseleration_SP_slow * (46603 *124);
+	gvl_io.Motor_State_Up:= FALSE;
 	GVL_IO.Step := 1115;
 	Delay := TRUE;
 	
@@ -925,6 +932,7 @@ END_CASE]]></ST>
 		//gvl_io.Speed_SP := gvl_io.Speed_SP_mem ;
 		//gvl_io.Accseleration_SP := gvl_io.Accseleration_SP_mem ;
 		gvl_io.test_motor_sldown_ok := TRUE;
+		gvl_io.Motor_State_Down:= TRUE;
 		GVL_IO.Step := 0;
 	END_IF
 	
@@ -1361,7 +1369,21 @@ END_CASE]]></ST>
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="FB_Sequence.act_Main_State">
-      <LineId Id="2" Count="510" />
+      <LineId Id="2" Count="18" />
+      <LineId Id="521" Count="1" />
+      <LineId Id="21" Count="30" />
+      <LineId Id="517" Count="0" />
+      <LineId Id="52" Count="4" />
+      <LineId Id="518" Count="0" />
+      <LineId Id="57" Count="263" />
+      <LineId Id="516" Count="0" />
+      <LineId Id="321" Count="17" />
+      <LineId Id="514" Count="0" />
+      <LineId Id="339" Count="5" />
+      <LineId Id="515" Count="0" />
+      <LineId Id="345" Count="19" />
+      <LineId Id="513" Count="0" />
+      <LineId Id="365" Count="147" />
       <LineId Id="1" Count="0" />
     </LineIds>
   </POU>
