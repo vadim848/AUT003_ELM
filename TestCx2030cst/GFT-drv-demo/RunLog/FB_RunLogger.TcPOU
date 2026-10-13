@@ -42,7 +42,7 @@ VAR CONSTANT
 		LOG_DIR		: STRING := '\Hard Disk\ftp\Logs';
 	{END_IF}
 	FORMAT_ID	: STRING := 'AUT003-ELM-LOG/1';
-	SAMPLE_MS	: UDINT := 100;		// FB_Sequence raises bAppend every 100 ms
+	SAMPLE_MS	: UDINT := 10;		// FB_Sequence raises bAppend every 100 ms
 END_VAR
 VAR
 	rtStart		: R_TRIG;
@@ -199,8 +199,7 @@ END_CASE
 ]]></ST>
     </Implementation>
     <LineIds Name="FB_RunLogger">
-      <LineId Id="3" Count="142" />
-      <LineId Id="2" Count="0" />
+      <LineId Id="3" Count="133" />
     </LineIds>
   </POU>
 </TcPlcObject>

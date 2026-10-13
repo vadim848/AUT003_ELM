@@ -35,8 +35,8 @@ VAR_GLOBAL
 	Position_PV, Position_SP, Motor_I , Position_PV_HMI, Position_PV_Diff: DINT;
 	 
 	Motor_I_PV, Motor_I_MAX, Motor_I_AVR : REAL;
-	Motor_I_mem : ARRAY [0..500] OF REAL;
-	Position_PV_mem : ARRAY [0..500] OF DINT;
+	Motor_I_mem : ARRAY [0..5000] OF REAL;
+	Position_PV_mem : ARRAY [0..5000] OF DINT;
 	
 	
 	Enable, Emergancy_OK, Motor_UP_cmd, Motor_DN_cmd, Homing_OK, Homing_cmd , TwoSensorLock:BOOL;

@@ -105,7 +105,7 @@
 						<Defines>PLC</Defines>
 					</Variant>
 				</ProjectVariant>
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="GFT-drv-demo\GFT-drv-demo.tmc" TmcHash="{47BA769F-2AA7-A4CB-F780-9C6544A1CD79}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="GFT-drv-demo\GFT-drv-demo.tmc" TmcHash="{E5409458-C09D-23DC-68BF-10C95B67767C}">
 					<Name>GFT-drv-demo Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">

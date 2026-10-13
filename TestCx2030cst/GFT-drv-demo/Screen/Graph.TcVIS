@@ -639,11 +639,11 @@
                     </o>
                     <o>
                       <v n="Id">48782508L</v>
-                      <v n="Value">500</v>
+                      <v n="Value">5000</v>
                     </o>
                     <o>
                       <v n="Id">788070771L</v>
-                      <v n="Value">"ARRAY [0..500] OF DINT"</v>
+                      <v n="Value">"ARRAY [0..5000] OF DINT"</v>
                     </o>
                     <o>
                       <v n="Id">2597686782L</v>
@@ -1202,11 +1202,11 @@
                     </o>
                     <o>
                       <v n="Id">48782508L</v>
-                      <v n="Value">500</v>
+                      <v n="Value">5000</v>
                     </o>
                     <o>
                       <v n="Id">788070771L</v>
-                      <v n="Value">"ARRAY [0..500] OF REAL"</v>
+                      <v n="Value">"ARRAY [0..5000] OF REAL"</v>
                     </o>
                     <o>
                       <v n="Id">2597686782L</v>

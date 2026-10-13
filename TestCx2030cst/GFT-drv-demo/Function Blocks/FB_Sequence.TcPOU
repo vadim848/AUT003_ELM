@@ -25,6 +25,8 @@ VAR
 	i , a , count: INT;
 	Motor_curr_sum : REAL;
 	
+	buffer_size: INT:=5000;
+
 
 	
 END_VAR
@@ -381,13 +383,13 @@ act_Gripper_State();
 
 
 //**************** LOG **************
-tonLogTimer(IN:= gvl_io.tonLogTimer_IN AND NOT gvl_io.tonLogTimer_Q, PT:=T#100MS , Q=> gvl_io.tonLogTimer_Q, ET=> );
+tonLogTimer(IN:= gvl_io.tonLogTimer_IN AND NOT gvl_io.tonLogTimer_Q, PT:=T#10MS , Q=> gvl_io.tonLogTimer_Q, ET=> );
 IF gvl_io.tonLogTimer_Q
 	THEN
 	gvl_io.Lod_appendLine_cmd := TRUE;
 	i := i + 1;	
 	IF i < 0 
-		OR i > 500
+		OR i > buffer_size
 		THEN
 		i := 0;
 	END_IF
@@ -422,7 +424,7 @@ IF gvl_io.Calc_log_cmd
 	THEN
 	count := 0;
 	Motor_curr_sum := 0.0;
-	FOR a := 1 TO 500 DO 	
+	FOR a := 1 TO buffer_size DO 	
 	
 		IF gvl_io.Motor_I_mem[a] > 0
 			THEN
