@@ -72,6 +72,7 @@ IF bSelfTesting THEN
 		rCurrent := 5.0 + 12.5 * INT_TO_REAL(nTestSamples),
 		nPosition := -106 + 10 * nTestSamples,
 		stNow := Prg_GetClock.stSystemTime,
+		sPlcVersion := GVL_RunLog.PLC_VERSION,
 		bAppend := bTestAppend,
 		bClose := bTestClose);
 END_IF
@@ -88,6 +89,7 @@ IF NOT bSelfTesting THEN
 		rCurrent := gvl_io.Motor_I_PV,
 		nPosition := gvl_io.Position_PV_HMI,
 		stNow := Prg_GetClock.stSystemTime,
+		sPlcVersion := GVL_RunLog.PLC_VERSION,
 		bAppend := gvl_io.Lod_appendLine_cmd,
 		bClose := gvl_io.Log_CloseFile_cmd);
 END_IF

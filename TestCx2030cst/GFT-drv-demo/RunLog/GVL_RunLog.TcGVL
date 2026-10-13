@@ -11,8 +11,11 @@ VAR_GLOBAL
 	LastError	: STRING(255);	// last problem; a run without a valid SN is not logged
 	ErrorCount	: UDINT;
 	{IF defined (Develop)}
-	SelfTest	: BOOL;			// VM only: TRUE writes a scripted 10-sample run as <stamp>_TEST.log
+	SelfTest	: BOOL;			// VM only: TRUE writes a scripted 10-sample run as <stamp>_999.log
 	{END_IF}
+END_VAR
+VAR_GLOBAL CONSTANT
+	PLC_VERSION	: STRING(20) := 'V2.0';	// bump by hand with every PLC program release; goes into each run log
 END_VAR
 ]]></Declaration>
   </GVL>
