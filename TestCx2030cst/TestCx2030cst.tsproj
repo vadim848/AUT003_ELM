@@ -105,7 +105,7 @@
 						<Defines>PLC</Defines>
 					</Variant>
 				</ProjectVariant>
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="GFT-drv-demo\GFT-drv-demo.tmc" TmcHash="{8A2B7A18-9387-9DA8-E2F3-D18268C563CD}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="GFT-drv-demo\GFT-drv-demo.tmc" TmcHash="{BF46B048-6071-1DE9-1BB0-2F3B2BD3394C}">
 					<Name>GFT-drv-demo Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -180,12 +180,12 @@
 							<Type>INT</Type>
 						</Var>
 						<Var>
-							<Name>ServoCtrl.PosTarget</Name>
-							<Type>DINT</Type>
-						</Var>
-						<Var>
 							<Name>ServoCtrl.ControlWord</Name>
 							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>ServoCtrl.PosTarget</Name>
+							<Type>DINT</Type>
 						</Var>
 						<Var>
 							<Name>ServoCtrl.ModeOfOperation</Name>
