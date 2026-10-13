@@ -98,14 +98,14 @@
 				<ProjectVariant PvUseDefine="true">
 					<Variant>
 						<Name>Develop</Name>
-						<Defines></Defines>
+						<Defines/>
 					</Variant>
 					<Variant>
 						<Name>PLC</Name>
 						<Defines>PLC</Defines>
 					</Variant>
 				</ProjectVariant>
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="GFT-drv-demo\GFT-drv-demo.tmc" TmcHash="{BF46B048-6071-1DE9-1BB0-2F3B2BD3394C}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="GFT-drv-demo\GFT-drv-demo.tmc" TmcHash="{47BA769F-2AA7-A4CB-F780-9C6544A1CD79}">
 					<Name>GFT-drv-demo Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">

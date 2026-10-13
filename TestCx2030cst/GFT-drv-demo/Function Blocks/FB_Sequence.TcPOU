@@ -327,7 +327,240 @@ GVL_IO.Ready_for_start := GVL_IO.Emergancy_OK
 
 
 // Sequence
-CASE GVL_IO.Step OF 
+act_Main_State();
+
+///// ******* Posotion SP Limit *******
+IF gvl_io.Position_SP  >= gvl_io.Motor_Limit_UP - 1 
+	THEN
+	gvl_io.Position_SP := gvl_io.Motor_Limit_UP - 1; 
+	ELSIF 
+		gvl_io.Position_SP <= gvl_io.Motor_Limit_DN + 1 
+	THEN 
+	gvl_io.Position_SP := gvl_io.Motor_Limit_DN + 1;
+END_IF
+
+
+
+// 		******** GRIPPER *************
+
+// One Sensor lock not work 
+tonOneSensorError(IN:= gvl_io.Gripper_step >0 AND ((gvl_io.ixGripperLock_1 AND NOT gvl_io.ixGripperLock_2) OR (NOT  gvl_io.ixGripperLock_1 AND gvl_io.ixGripperLock_2)) , PT:= T#2S , Q=> , ET=> );
+IF tonOneSensorError.Q
+	THEN
+	gvl_io.SensorLock_Error := TRUE;
+END_IF
+
+//TON Gripper Open Error
+tonGripper_Open_error(IN:= GVL_IO.Gripper_Open_cmd OR (gvl_io.Gripper_step >0 AND gvl_io.Gripper_step <=130), PT:= T#2S, Q=> , ET=> );
+IF tonGripper_Open_error.Q
+	THEN
+		GVL_IO.Gripper_Open_Error := TRUE;
+		GVL_IO.qxActuator_1 := FALSE;
+		GVL_IO.qxActuator_2 := FALSE;
+		GVL_IO.Gripper_Open_cmd  := FALSE;
+		gvl_io.test_Gripper_open_OK := FALSE;
+		gvl_io.Gripper_step := 0;
+		gvl_io.Step := 0;
+END_IF
+
+
+//TON Gripper Close Error
+tonGropper_Close_Error(IN:= GVL_IO.Gripper_Close_cmd OR (gvl_io.Gripper_step >=200 AND gvl_io.Gripper_step <=230) , PT:= T#2S , Q=> , ET=> );
+IF tonGropper_Close_Error.Q
+	THEN
+		GVL_IO.Gripper_Close_Error := TRUE;
+		GVL_IO.qxActuator_1 := FALSE;
+		GVL_IO.qxActuator_2 := FALSE;
+		GVL_IO.Gripper_Close_cmd  := FALSE;
+		gvl_io.test_Gripper_close_OK := TRUE;
+		gvl_io.Gripper_step := 0;
+		gvl_io.Step := 0;		
+END_IF
+
+act_Gripper_State();
+
+
+//**************** LOG **************
+tonLogTimer(IN:= gvl_io.tonLogTimer_IN AND NOT gvl_io.tonLogTimer_Q, PT:=T#100MS , Q=> gvl_io.tonLogTimer_Q, ET=> );
+IF gvl_io.tonLogTimer_Q
+	THEN
+	gvl_io.Lod_appendLine_cmd := TRUE;
+	i := i + 1;	
+	IF i < 0 
+		OR i > 500
+		THEN
+		i := 0;
+	END_IF
+END_IF
+
+
+
+IF gvl_io.Step > 200 
+	AND gvl_io.Step < 700
+	AND GVL_IO.Cycle_PV >= (GVL_IO.Cycle_SP - 1)
+	THEN
+	gvl_io.tonLogTimer_IN := TRUE;
+	ELSE
+	gvl_io.tonLogTimer_IN := FALSE;	
+END_IF
+
+// 		Find MAX Motor current in last cycle 
+IF gvl_io.tonLogTimer_IN
+	AND gvl_io.Motor_I_MAX < gvl_io.Motor_I_PV
+	THEN
+	gvl_io.Motor_I_MAX := gvl_io.Motor_I_PV ;	
+END_IF
+
+// 		Calculation Average Motor Current in last cycle 
+IF gvl_io.Lod_appendLine_cmd
+	THEN
+	gvl_io.Motor_I_mem[i] := gvl_io.Motor_I_PV;
+	gvl_io.Position_PV_mem[i] := gvl_io.Position_PV_HMI;	
+END_IF
+
+IF gvl_io.Calc_log_cmd
+	THEN
+	count := 0;
+	Motor_curr_sum := 0.0;
+	FOR a := 1 TO 500 DO 	
+	
+		IF gvl_io.Motor_I_mem[a] > 0
+			THEN
+			Motor_curr_sum := Motor_curr_sum + gvl_io.Motor_I_mem[a];
+			count := count + 1;
+			
+		END_IF	
+	END_FOR
+	
+	gvl_io.Motor_I_AVR := Motor_curr_sum / INT_TO_REAL(count);	
+	gvl_io.Calc_log_cmd := FALSE;
+END_IF
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></ST>
+    </Implementation>
+    <Action Name="act_Gripper_State" Id="{8d0a8818-5656-4dbe-b4c2-1c9fdc8c392a}">
+      <Implementation>
+        <ST><![CDATA[CASE GVL_IO.Gripper_step OF 
+	
+	0: 	// Wait command 
+	IF gvl_io.Gripper_Open_cmd 
+		AND NOT GVL_IO.Error
+		THEN
+			GVL_IO.Gripper_step := 100; // Open Gripper
+		ELSIF gvl_io.Gripper_Close_cmd 
+			AND NOT GVL_IO.Error
+			THEN
+			gvl_io.Gripper_step := 200; // Close Gripper
+	END_IF
+	
+	100: 	//check sensor 
+	IF gvl_io.ixGripper_Unlock
+		THEN
+			gvl_io.Gripper_Open_cmd := FALSE;
+			gvl_io.Gripper_step := 0;
+			gvl_io.Gripper_State_Open  := TRUE;
+			gvl_io.Gripper_State_Close := FALSE;
+					ELSE
+			gvl_io.Gripper_step := 110;
+	END_IF
+	
+	
+	110: 	//Open Gripper sequence
+	gvl_io.qxActuator_1 := TRUE;
+	gvl_io.qxActuator_2 := TRUE;
+	gvl_io.Gripper_step := 120;
+	gvl_io.Gripper_State_Close := FALSE;
+	
+	120: 	// wait sensor 
+	IF gvl_io.ixGripper_Unlock
+		THEN
+		gvl_io.qxActuator_1 := FALSE;
+		gvl_io.qxActuator_2 := FALSE;
+		gvl_io.Gripper_Open_cmd := FALSE;
+		gvl_io.Gripper_State_Open := TRUE;
+		gvl_io.test_Gripper_open_OK := TRUE;		
+		gvl_io.Gripper_step := 0;
+	END_IF
+	
+	
+	
+	200: 	//check sensor 
+	IF gvl_io.ixGripperLock_1 AND gvl_io.ixGripperLock_2
+		THEN
+			gvl_io.Gripper_Close_cmd := FALSE;
+			gvl_io.Gripper_step := 0;
+			gvl_io.Gripper_State_Close := TRUE; 
+			
+		ELSE
+			gvl_io.Gripper_step := 210;
+	END_IF
+	
+	
+	210: 	//Close Gripper sequence
+	gvl_io.qxActuator_1 := FALSE;
+	gvl_io.qxActuator_2 := TRUE;	
+	gvl_io.Gripper_step := 220;
+	gvl_io.Gripper_State_Open := FALSE;
+
+	
+	220: 	// wait sensor 
+	IF gvl_io.ixGripperLock_1 AND gvl_io.ixGripperLock_2
+		THEN
+		gvl_io.qxActuator_1 := FALSE;
+		gvl_io.qxActuator_2 := FALSE;
+		gvl_io.Gripper_Close_cmd := FALSE;
+		gvl_io.Gripper_State_Close := TRUE;
+		gvl_io.test_Gripper_close_OK := TRUE;
+		gvl_io.Gripper_step := 0;
+	END_IF
+	
+	
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="act_Main_State" Id="{55c86d07-dddb-42b4-93df-21c992c4c743}">
+      <Implementation>
+        <ST><![CDATA[CASE GVL_IO.Step OF 
 	
 	0: //
 	i := 0;
@@ -838,230 +1071,9 @@ IF GVL_IO.Cycle_PV < GVL_IO.Cycle_SP
 	
 	
 
-END_CASE
-
-///// ******* Posotion SP Limit *******
-IF gvl_io.Position_SP  >= gvl_io.Motor_Limit_UP - 1 
-	THEN
-	gvl_io.Position_SP := gvl_io.Motor_Limit_UP - 1; 
-	ELSIF 
-		gvl_io.Position_SP <= gvl_io.Motor_Limit_DN + 1 
-	THEN 
-	gvl_io.Position_SP := gvl_io.Motor_Limit_DN + 1;
-END_IF
-
-
-
-// 		******** GRIPPER *************
-
-// One Sensor lock not work 
-tonOneSensorError(IN:= gvl_io.Gripper_step >0 AND ((gvl_io.ixGripperLock_1 AND NOT gvl_io.ixGripperLock_2) OR (NOT  gvl_io.ixGripperLock_1 AND gvl_io.ixGripperLock_2)) , PT:= T#2S , Q=> , ET=> );
-IF tonOneSensorError.Q
-	THEN
-	gvl_io.SensorLock_Error := TRUE;
-END_IF
-
-//TON Gripper Open Error
-tonGripper_Open_error(IN:= GVL_IO.Gripper_Open_cmd OR (gvl_io.Gripper_step >0 AND gvl_io.Gripper_step <=130), PT:= T#2S, Q=> , ET=> );
-IF tonGripper_Open_error.Q
-	THEN
-		GVL_IO.Gripper_Open_Error := TRUE;
-		GVL_IO.qxActuator_1 := FALSE;
-		GVL_IO.qxActuator_2 := FALSE;
-		GVL_IO.Gripper_Open_cmd  := FALSE;
-		gvl_io.test_Gripper_open_OK := FALSE;
-		gvl_io.Gripper_step := 0;
-		gvl_io.Step := 0;
-END_IF
-
-
-//TON Gripper Close Error
-tonGropper_Close_Error(IN:= GVL_IO.Gripper_Close_cmd OR (gvl_io.Gripper_step >=200 AND gvl_io.Gripper_step <=230) , PT:= T#2S , Q=> , ET=> );
-IF tonGropper_Close_Error.Q
-	THEN
-		GVL_IO.Gripper_Close_Error := TRUE;
-		GVL_IO.qxActuator_1 := FALSE;
-		GVL_IO.qxActuator_2 := FALSE;
-		GVL_IO.Gripper_Close_cmd  := FALSE;
-		gvl_io.test_Gripper_close_OK := TRUE;
-		gvl_io.Gripper_step := 0;
-		gvl_io.Step := 0;		
-END_IF
-
-CASE GVL_IO.Gripper_step OF 
-	
-	0: 	// Wait command 
-	IF gvl_io.Gripper_Open_cmd 
-		AND NOT GVL_IO.Error
-		THEN
-			GVL_IO.Gripper_step := 100; // Open Gripper
-		ELSIF gvl_io.Gripper_Close_cmd 
-			AND NOT GVL_IO.Error
-			THEN
-			gvl_io.Gripper_step := 200; // Close Gripper
-	END_IF
-	
-	100: 	//check sensor 
-	IF gvl_io.ixGripper_Unlock
-		THEN
-			gvl_io.Gripper_Open_cmd := FALSE;
-			gvl_io.Gripper_step := 0;
-			gvl_io.test_Gripper_open_OK := TRUE;
-			gvl_io.test_Gripper_close_OK := FALSE;
-		ELSE
-			gvl_io.Gripper_step := 110;
-	END_IF
-	
-	
-	110: 	//Open Gripper sequence
-	gvl_io.qxActuator_1 := TRUE;
-	gvl_io.qxActuator_2 := TRUE;
-	gvl_io.Gripper_step := 120;
-	gvl_io.test_Gripper_close_OK := FALSE;
-	
-	120: 	// wait sensor 
-	IF gvl_io.ixGripper_Unlock
-		THEN
-		gvl_io.qxActuator_1 := FALSE;
-		gvl_io.qxActuator_2 := FALSE;
-		gvl_io.Gripper_Open_cmd := FALSE;
-		gvl_io.test_Gripper_open_OK := TRUE;
-		gvl_io.Gripper_step := 0;
-	END_IF
-	
-	
-	
-	200: 	//check sensor 
-	IF gvl_io.ixGripperLock_1 AND gvl_io.ixGripperLock_2
-		THEN
-			gvl_io.Gripper_Close_cmd := FALSE;
-			gvl_io.Gripper_step := 0;
-			gvl_io.test_Gripper_close_OK := TRUE;
-			gvl_io.test_Gripper_open_OK := FALSE;
-		ELSE
-			gvl_io.Gripper_step := 210;
-	END_IF
-	
-	
-	210: 	//Close Gripper sequence
-	gvl_io.qxActuator_1 := FALSE;
-	gvl_io.qxActuator_2 := TRUE;	
-	gvl_io.Gripper_step := 220;
-	gvl_io.test_Gripper_open_OK := FALSE;
-
-	
-	220: 	// wait sensor 
-	IF gvl_io.ixGripperLock_1 AND gvl_io.ixGripperLock_2
-		THEN
-		gvl_io.qxActuator_1 := FALSE;
-		gvl_io.qxActuator_2 := FALSE;
-		gvl_io.Gripper_Close_cmd := FALSE;
-		gvl_io.test_Gripper_close_OK := TRUE;
-		gvl_io.Gripper_step := 0;
-	END_IF
-	
-	
-END_CASE
-
-
-//**************** LOG **************
-tonLogTimer(IN:= gvl_io.tonLogTimer_IN AND NOT gvl_io.tonLogTimer_Q, PT:=T#100MS , Q=> gvl_io.tonLogTimer_Q, ET=> );
-IF gvl_io.tonLogTimer_Q
-	THEN
-	gvl_io.Lod_appendLine_cmd := TRUE;
-	i := i + 1;	
-	IF i < 0 
-		OR i > 500
-		THEN
-		i := 0;
-	END_IF
-END_IF
-
-
-
-IF gvl_io.Step > 200 
-	AND gvl_io.Step < 700
-	AND GVL_IO.Cycle_PV >= (GVL_IO.Cycle_SP - 1)
-	THEN
-	gvl_io.tonLogTimer_IN := TRUE;
-	ELSE
-	gvl_io.tonLogTimer_IN := FALSE;	
-END_IF
-
-// 		Find MAX Motor current in last cycle 
-IF gvl_io.tonLogTimer_IN
-	AND gvl_io.Motor_I_MAX < gvl_io.Motor_I_PV
-	THEN
-	gvl_io.Motor_I_MAX := gvl_io.Motor_I_PV ;	
-END_IF
-
-// 		Calculation Average Motor Current in last cycle 
-IF gvl_io.Lod_appendLine_cmd
-	THEN
-	gvl_io.Motor_I_mem[i] := gvl_io.Motor_I_PV;
-	gvl_io.Position_PV_mem[i] := gvl_io.Position_PV_HMI;	
-END_IF
-
-IF gvl_io.Calc_log_cmd
-	THEN
-	count := 0;
-	Motor_curr_sum := 0.0;
-	FOR a := 1 TO 500 DO 	
-	
-		IF gvl_io.Motor_I_mem[a] > 0
-			THEN
-			Motor_curr_sum := Motor_curr_sum + gvl_io.Motor_I_mem[a];
-			count := count + 1;
-			
-		END_IF	
-	END_FOR
-	
-	gvl_io.Motor_I_AVR := Motor_curr_sum / INT_TO_REAL(count);	
-	gvl_io.Calc_log_cmd := FALSE;
-END_IF
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-]]></ST>
-    </Implementation>
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
     <LineIds Name="FB_Sequence">
       <LineId Id="431" Count="0" />
       <LineId Id="1644" Count="0" />
@@ -1255,195 +1267,7 @@ END_IF
       <LineId Id="1805" Count="0" />
       <LineId Id="1260" Count="1" />
       <LineId Id="1228" Count="0" />
-      <LineId Id="504" Count="4" />
-      <LineId Id="1703" Count="0" />
-      <LineId Id="2059" Count="0" />
-      <LineId Id="509" Count="4" />
-      <LineId Id="1807" Count="0" />
-      <LineId Id="1809" Count="4" />
-      <LineId Id="1808" Count="0" />
-      <LineId Id="2032" Count="0" />
-      <LineId Id="1814" Count="0" />
-      <LineId Id="1816" Count="1" />
-      <LineId Id="2035" Count="4" />
-      <LineId Id="2034" Count="0" />
-      <LineId Id="2040" Count="0" />
-      <LineId Id="2046" Count="0" />
-      <LineId Id="2048" Count="1" />
-      <LineId Id="514" Count="5" />
-      <LineId Id="521" Count="4" />
-      <LineId Id="1006" Count="0" />
-      <LineId Id="1010" Count="2" />
-      <LineId Id="1591" Count="1" />
-      <LineId Id="1590" Count="0" />
-      <LineId Id="1593" Count="1" />
-      <LineId Id="1598" Count="3" />
-      <LineId Id="1596" Count="0" />
-      <LineId Id="526" Count="0" />
-      <LineId Id="1602" Count="0" />
-      <LineId Id="527" Count="2" />
-      <LineId Id="531" Count="2" />
-      <LineId Id="535" Count="0" />
-      <LineId Id="542" Count="1" />
-      <LineId Id="545" Count="6" />
-      <LineId Id="553" Count="1" />
-      <LineId Id="556" Count="1" />
-      <LineId Id="564" Count="1" />
-      <LineId Id="567" Count="5" />
-      <LineId Id="1785" Count="1" />
-      <LineId Id="1788" Count="0" />
-      <LineId Id="1787" Count="0" />
-      <LineId Id="1789" Count="2" />
-      <LineId Id="573" Count="1" />
-      <LineId Id="2058" Count="0" />
-      <LineId Id="2060" Count="0" />
-      <LineId Id="2103" Count="0" />
-      <LineId Id="575" Count="2" />
-      <LineId Id="1183" Count="0" />
-      <LineId Id="578" Count="0" />
-      <LineId Id="580" Count="0" />
-      <LineId Id="2101" Count="0" />
-      <LineId Id="581" Count="3" />
-      <LineId Id="586" Count="1" />
-      <LineId Id="589" Count="1" />
-      <LineId Id="597" Count="1" />
-      <LineId Id="600" Count="1" />
-      <LineId Id="2102" Count="0" />
-      <LineId Id="2104" Count="0" />
-      <LineId Id="602" Count="9" />
-      <LineId Id="613" Count="0" />
-      <LineId Id="1184" Count="0" />
-      <LineId Id="614" Count="0" />
-      <LineId Id="616" Count="4" />
-      <LineId Id="1185" Count="0" />
-      <LineId Id="623" Count="1" />
-      <LineId Id="626" Count="1" />
-      <LineId Id="634" Count="1" />
-      <LineId Id="637" Count="13" />
-      <LineId Id="1186" Count="0" />
-      <LineId Id="653" Count="1" />
-      <LineId Id="656" Count="1" />
-      <LineId Id="664" Count="1" />
-      <LineId Id="667" Count="10" />
-      <LineId Id="1187" Count="0" />
-      <LineId Id="678" Count="0" />
-      <LineId Id="680" Count="6" />
-      <LineId Id="688" Count="7" />
-      <LineId Id="1188" Count="0" />
-      <LineId Id="698" Count="1" />
-      <LineId Id="701" Count="1" />
-      <LineId Id="709" Count="1" />
-      <LineId Id="712" Count="13" />
-      <LineId Id="727" Count="0" />
-      <LineId Id="1226" Count="0" />
-      <LineId Id="2051" Count="0" />
-      <LineId Id="2096" Count="0" />
-      <LineId Id="2099" Count="1" />
-      <LineId Id="728" Count="0" />
-      <LineId Id="1013" Count="4" />
-      <LineId Id="1034" Count="2" />
-      <LineId Id="1384" Count="0" />
-      <LineId Id="1037" Count="0" />
-      <LineId Id="1039" Count="0" />
-      <LineId Id="1019" Count="0" />
-      <LineId Id="1027" Count="1" />
-      <LineId Id="1032" Count="1" />
-      <LineId Id="1031" Count="0" />
-      <LineId Id="1041" Count="0" />
-      <LineId Id="1164" Count="0" />
-      <LineId Id="1029" Count="0" />
-      <LineId Id="1042" Count="4" />
-      <LineId Id="1048" Count="0" />
-      <LineId Id="1047" Count="0" />
-      <LineId Id="729" Count="0" />
-      <LineId Id="1050" Count="3" />
-      <LineId Id="1102" Count="4" />
-      <LineId Id="1099" Count="0" />
-      <LineId Id="1098" Count="0" />
-      <LineId Id="1056" Count="1" />
-      <LineId Id="1075" Count="0" />
-      <LineId Id="1087" Count="0" />
-      <LineId Id="1118" Count="0" />
-      <LineId Id="1055" Count="0" />
-      <LineId Id="1107" Count="0" />
-      <LineId Id="1073" Count="1" />
-      <LineId Id="1078" Count="1" />
-      <LineId Id="1093" Count="0" />
-      <LineId Id="1090" Count="0" />
-      <LineId Id="2107" Count="0" />
-      <LineId Id="1091" Count="1" />
-      <LineId Id="1089" Count="0" />
-      <LineId Id="1080" Count="0" />
-      <LineId Id="1094" Count="3" />
-      <LineId Id="1163" Count="0" />
-      <LineId Id="1110" Count="0" />
-      <LineId Id="1114" Count="0" />
-      <LineId Id="2108" Count="0" />
-      <LineId Id="1116" Count="1" />
-      <LineId Id="1109" Count="0" />
-      <LineId Id="1119" Count="1" />
-      <LineId Id="1123" Count="0" />
-      <LineId Id="1125" Count="0" />
-      <LineId Id="1128" Count="0" />
-      <LineId Id="1130" Count="1" />
-      <LineId Id="1136" Count="1" />
-      <LineId Id="1127" Count="0" />
-      <LineId Id="1122" Count="0" />
-      <LineId Id="1138" Count="1" />
-      <LineId Id="1141" Count="1" />
-      <LineId Id="1140" Count="0" />
-      <LineId Id="1143" Count="1" />
-      <LineId Id="1151" Count="0" />
-      <LineId Id="1121" Count="0" />
-      <LineId Id="1145" Count="0" />
-      <LineId Id="1603" Count="2" />
-      <LineId Id="1631" Count="0" />
-      <LineId Id="1607" Count="0" />
-      <LineId Id="1632" Count="1" />
-      <LineId Id="1637" Count="0" />
-      <LineId Id="2109" Count="0" />
-      <LineId Id="1638" Count="0" />
-      <LineId Id="1647" Count="0" />
-      <LineId Id="1642" Count="0" />
-      <LineId Id="1640" Count="1" />
-      <LineId Id="1661" Count="5" />
-      <LineId Id="1612" Count="0" />
-      <LineId Id="1652" Count="0" />
-      <LineId Id="1613" Count="3" />
-      <LineId Id="1683" Count="0" />
-      <LineId Id="1617" Count="3" />
-      <LineId Id="1675" Count="0" />
-      <LineId Id="2113" Count="0" />
-      <LineId Id="1676" Count="0" />
-      <LineId Id="1669" Count="2" />
-      <LineId Id="1677" Count="2" />
-      <LineId Id="1621" Count="3" />
-      <LineId Id="1680" Count="0" />
-      <LineId Id="1625" Count="4" />
-      <LineId Id="1681" Count="1" />
-      <LineId Id="1684" Count="0" />
-      <LineId Id="1630" Count="0" />
-      <LineId Id="1606" Count="0" />
-      <LineId Id="1049" Count="0" />
-      <LineId Id="1895" Count="0" />
-      <LineId Id="2027" Count="0" />
-      <LineId Id="1901" Count="0" />
-      <LineId Id="2065" Count="0" />
-      <LineId Id="2063" Count="0" />
-      <LineId Id="2066" Count="0" />
-      <LineId Id="1902" Count="17" />
-      <LineId Id="2061" Count="0" />
-      <LineId Id="1920" Count="73" />
-      <LineId Id="2028" Count="0" />
-      <LineId Id="1994" Count="6" />
-      <LineId Id="2029" Count="2" />
-      <LineId Id="2001" Count="24" />
-      <LineId Id="2050" Count="0" />
-      <LineId Id="2067" Count="0" />
-      <LineId Id="2026" Count="0" />
-      <LineId Id="1894" Count="0" />
-      <LineId Id="1896" Count="4" />
-      <LineId Id="731" Count="0" />
+      <LineId Id="504" Count="1" />
       <LineId Id="56" Count="0" />
       <LineId Id="1330" Count="1" />
       <LineId Id="1356" Count="1" />
@@ -1469,48 +1293,6 @@ END_IF
       <LineId Id="1313" Count="0" />
       <LineId Id="964" Count="0" />
       <LineId Id="962" Count="0" />
-      <LineId Id="864" Count="0" />
-      <LineId Id="885" Count="0" />
-      <LineId Id="884" Count="0" />
-      <LineId Id="886" Count="0" />
-      <LineId Id="1315" Count="0" />
-      <LineId Id="889" Count="2" />
-      <LineId Id="1316" Count="0" />
-      <LineId Id="892" Count="1" />
-      <LineId Id="888" Count="0" />
-      <LineId Id="897" Count="1" />
-      <LineId Id="935" Count="1" />
-      <LineId Id="938" Count="0" />
-      <LineId Id="998" Count="0" />
-      <LineId Id="2145" Count="0" />
-      <LineId Id="2148" Count="0" />
-      <LineId Id="939" Count="1" />
-      <LineId Id="937" Count="0" />
-      <LineId Id="933" Count="1" />
-      <LineId Id="899" Count="3" />
-      <LineId Id="2144" Count="0" />
-      <LineId Id="903" Count="3" />
-      <LineId Id="908" Count="1" />
-      <LineId Id="1150" Count="0" />
-      <LineId Id="1586" Count="0" />
-      <LineId Id="952" Count="0" />
-      <LineId Id="907" Count="0" />
-      <LineId Id="911" Count="0" />
-      <LineId Id="941" Count="1" />
-      <LineId Id="944" Count="3" />
-      <LineId Id="997" Count="0" />
-      <LineId Id="2146" Count="1" />
-      <LineId Id="948" Count="1" />
-      <LineId Id="943" Count="0" />
-      <LineId Id="950" Count="1" />
-      <LineId Id="912" Count="3" />
-      <LineId Id="2142" Count="1" />
-      <LineId Id="916" Count="5" />
-      <LineId Id="955" Count="0" />
-      <LineId Id="1588" Count="0" />
-      <LineId Id="922" Count="1" />
-      <LineId Id="867" Count="0" />
-      <LineId Id="869" Count="0" />
       <LineId Id="868" Count="0" />
       <LineId Id="1524" Count="1" />
       <LineId Id="1523" Count="0" />
@@ -1565,6 +1347,20 @@ END_IF
       <LineId Id="1526" Count="0" />
       <LineId Id="958" Count="0" />
       <LineId Id="957" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Sequence.act_Gripper_State">
+      <LineId Id="2" Count="19" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="23" Count="15" />
+      <LineId Id="78" Count="1" />
+      <LineId Id="40" Count="29" />
+      <LineId Id="80" Count="1" />
+      <LineId Id="71" Count="3" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Sequence.act_Main_State">
+      <LineId Id="2" Count="510" />
+      <LineId Id="1" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
