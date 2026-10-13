@@ -5,7 +5,7 @@
 {attribute 'qualified_only'}
 VAR_GLOBAL
 	SN			: STRING(32);	// part serial number, entered on Overview_ATP before START
-	SN_valid	: BOOL;			// 1..32 characters of A-Z a-z 0-9 -; ATP START needs it
+	SN_valid	: BOOL;			// exactly three digits, 001..999; ATP START needs it
 	State		: STRING(40);	// what the logger is doing now
 	LastFile	: STRING(255);	// last finished run log
 	LastError	: STRING(255);	// last problem; a run without a valid SN is not logged

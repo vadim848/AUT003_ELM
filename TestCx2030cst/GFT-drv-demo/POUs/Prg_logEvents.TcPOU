@@ -66,7 +66,7 @@ IF bSelfTesting THEN
 		bStart := bTestStart,
 		bRunActive := TRUE,
 		bReset := FALSE,
-		sSN := 'TEST',
+		sSN := '999',	// a valid SN, so elm-report can read the self-test log
 		bSnValid := TRUE,
 		nCyclesSet := 5,
 		rCurrent := 5.0 + 12.5 * INT_TO_REAL(nTestSamples),
