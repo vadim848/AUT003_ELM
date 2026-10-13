@@ -21,6 +21,7 @@ VAR_INPUT
 	rCurrent	: REAL;			// Motor_I_PV
 	nPosition	: DINT;			// Position_PV_HMI
 	stNow		: TIMESTRUCT;	// PLC clock, for the file name and the start stamp
+	sPlcVersion	: STRING(20);	// GVL_RunLog.PLC_VERSION, written into the header
 END_VAR
 VAR_IN_OUT
 	bAppend		: BOOL;			// one sample is due; cleared here when taken
@@ -120,6 +121,7 @@ CASE nStep OF
 				sBuffer := CONCAT(sBuffer, CONCAT(CONCAT('# start=', sStartIso), '$R$N'));
 				sBuffer := CONCAT(sBuffer, CONCAT(CONCAT('# cycles_set=', UDINT_TO_STRING(nCyclesSet)), '$R$N'));
 				sBuffer := CONCAT(sBuffer, CONCAT(CONCAT('# logged_cycle=', UDINT_TO_STRING(nCyclesSet)), '$R$N'));
+				sBuffer := CONCAT(sBuffer, CONCAT(CONCAT('# plc_version=', sPlcVersion), '$R$N'));
 				sBuffer := CONCAT(sBuffer, 't_ms,current,position_deg$R$N');
 				nStep := 30;
 			END_IF
