@@ -105,7 +105,7 @@
 						<Defines>PLC</Defines>
 					</Variant>
 				</ProjectVariant>
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="GFT-drv-demo\GFT-drv-demo.tmc" TmcHash="{377A7267-A6C1-E891-8981-EE4A8317C106}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="GFT-drv-demo\GFT-drv-demo.tmc" TmcHash="{6240E7CA-1CF1-12F4-4708-3ADB73C07605}">
 					<Name>GFT-drv-demo Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -176,6 +176,10 @@
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
+							<Name>ServoCtrl.ModeOfOperation</Name>
+							<Type>SINT</Type>
+						</Var>
+						<Var>
 							<Name>ServoCtrl.TargetTorque</Name>
 							<Type>INT</Type>
 						</Var>
@@ -186,10 +190,6 @@
 						<Var>
 							<Name>ServoCtrl.PosTarget</Name>
 							<Type>DINT</Type>
-						</Var>
-						<Var>
-							<Name>ServoCtrl.ModeOfOperation</Name>
-							<Type>SINT</Type>
 						</Var>
 						<Var>
 							<Name>ServoCtrl.Max_torque0x6072</Name>
